@@ -1,8 +1,13 @@
 from collections import deque
+from copy import deepcopy
 from enum import Enum
 import uuid
 
-from NGIN.NGIN_Socialization import RESPONSE_WEIGHTS
+from NGIN.NGIN_Socialization import (
+    RESPONSE_WEIGHTS,
+    SOCIAL_INTERACTION_QUALIFIERS,
+    SOCIAL_INTERACTION_TYPES,
+)
 from .SimulaeNode import *
 
 class Action(Enum):
@@ -102,6 +107,136 @@ CRAFTING_RECIPES = {
 }
 
 
+# Social interactions are deliberately kept data-driven and deterministic so
+# tests can exercise the prompt -> response -> follow-up loop without needing a
+# language model. The canonical response families are still small, but the
+# weighting logic can grow over time as more of the social model matures.
+SOCIAL_RESPONSE_CANDIDATES = {
+    "Open": ["Open", "Inquire", "Inform", "Affect", "Topic"],
+    "Close": ["Close", "Affect", "Turn"],
+    "Turn": ["Turn", "Affect", "Close"],
+    "Topic": ["Topic", "Inform", "Inquire", "Stance"],
+    "Inform": ["Inquire", "Inform", "Stance", "Topic", "Affect"],
+    "Inquire": ["Inform", "Inquire", "Stance", "Deceive", "Turn", "Close"],
+    "Stance": ["Stance", "Inform", "Inquire", "Affect", "Close"],
+    "Influence": ["Stance", "Influence", "Negotiate", "Affect", "Close"],
+    "Affect": ["Affect", "Stance", "Inform", "Close"],
+    "Direct": ["Stance", "Direct", "Inquire", "Negotiate", "Close"],
+    "Negotiate": ["Negotiate", "Stance", "Inform", "Inquire", "Close"],
+    "Boundary": ["Boundary", "Stance", "Close", "Affect"],
+    "Coordinate": ["Coordinate", "Stance", "Direct", "Inform", "Close"],
+    "Deceive": ["Inquire", "Stance", "Deceive", "Close", "Affect"],
+    # The wiki notes "Summary" as a social interaction family, so we support
+    # it here even though it is not part of the current canonical list.
+    "Summary": ["Inform", "Inquire", "Close"],
+    "default": ["Inform", "Inquire", "Stance", "Close"],
+}
+
+
+SOCIAL_RESPONSE_SUBTYPES = {
+    "Open": ["greet", "acknowledge", "initiate"],
+    "Close": ["farewell", "withdraw"],
+    "Turn": ["interrupt", "cede", "stall"],
+    "Topic": ["stay-topic", "change-topic"],
+    "Inform": ["answer", "clarify", "reveal", "share"],
+    "Inquire": ["ask", "probe", "clarify", "challenge"],
+    "Stance": ["agree", "deny", "accept", "refuse", "validate", "invalidate"],
+    "Influence": ["persuade", "dissuade", "reassure", "pressure", "threaten"],
+    "Affect": ["comfort", "commiserate", "praise", "criticize", "insult", "apologize", "joke", "complain"],
+    "Direct": ["request", "demand", "command", "task", "delegate"],
+    "Negotiate": ["offer", "counteroffer", "volunteer"],
+    "Boundary": ["set-boundary", "violate-boundary"],
+    "Coordinate": ["rally", "organize", "promote", "demote", "resign"],
+    "Deceive": ["mislead", "conceal", "feign", "impersonate", "entrap", "cover"],
+    "Summary": ["reflect", "summarize"],
+    "default": ["acknowledge", "share", "clarify"],
+}
+
+
+SOCIAL_INTERACTION_ALIASES = {
+    "greet": "Open",
+    "greeting": "Open",
+    "initiate": "Open",
+    "open": "Open",
+    "farewell": "Close",
+    "withdraw": "Close",
+    "withdrawal": "Close",
+    "sever ties": "Close",
+    "interrupt": "Turn",
+    "cede": "Turn",
+    "stall": "Turn",
+    "phatic": "Turn",
+    "change topic": "Topic",
+    "stay topic": "Topic",
+    "topic": "Topic",
+    "claim": "Inform",
+    "disclose": "Inform",
+    "reveal": "Inform",
+    "confess": "Inform",
+    "observe": "Inform",
+    "clarify": "Inform",
+    "retract": "Inform",
+    "inform": "Inform",
+    "ask": "Inquire",
+    "probe": "Inquire",
+    "challenge": "Inquire",
+    "inquire": "Inquire",
+    "confirm": "Stance",
+    "deny": "Stance",
+    "agree": "Stance",
+    "disagree": "Stance",
+    "accept": "Stance",
+    "refuse": "Stance",
+    "validate": "Stance",
+    "invalidate": "Stance",
+    "stance": "Stance",
+    "persuade": "Influence",
+    "dissuade": "Influence",
+    "reassure": "Influence",
+    "pressure": "Influence",
+    "threaten": "Influence",
+    "influence": "Influence",
+    "comfort": "Affect",
+    "commiserate": "Affect",
+    "praise": "Affect",
+    "criticize": "Affect",
+    "insult": "Affect",
+    "apologize": "Affect",
+    "joke": "Affect",
+    "complain": "Affect",
+    "affect": "Affect",
+    "request": "Direct",
+    "demand": "Direct",
+    "command": "Direct",
+    "task": "Direct",
+    "delegate": "Direct",
+    "direct": "Direct",
+    "offer": "Negotiate",
+    "counteroffer": "Negotiate",
+    "volunteer": "Negotiate",
+    "negotiate": "Negotiate",
+    "set boundary": "Boundary",
+    "violate boundary": "Boundary",
+    "boundary": "Boundary",
+    "rally": "Coordinate",
+    "organize": "Coordinate",
+    "promote": "Coordinate",
+    "demote": "Coordinate",
+    "resign": "Coordinate",
+    "coordinate": "Coordinate",
+    "mislead": "Deceive",
+    "conceal": "Deceive",
+    "feign": "Deceive",
+    "impersonate": "Deceive",
+    "entrap": "Deceive",
+    "cover": "Deceive",
+    "deceive": "Deceive",
+    "summary": "Summary",
+    "reflect": "Summary",
+    "summarize": "Summary",
+}
+
+
 def _normalize_search_key(value):
     """Return a stable case-folded search key for names, IDs, and labels."""
 
@@ -109,6 +244,40 @@ def _normalize_search_key(value):
         return ""
 
     return normalize_str(str(value)).casefold()
+
+
+def _normalize_social_key(value):
+    """Return a stable lookup key for social-event types and subtypes."""
+
+    if value is None:
+        return ""
+
+    # The social notes use mixed punctuation ("greet", "greet!", "sever-ties",
+    # etc.) so we collapse separators before comparing labels.
+    normalized = normalize_str(str(value)).casefold()
+    normalized = normalized.replace("_", " ").replace("-", " ")
+    return " ".join(normalized.split())
+
+
+def _canonical_social_type(value):
+    """Map loose social labels to the canonical interaction families."""
+
+    normalized = _normalize_social_key(value)
+
+    if not normalized:
+        return None
+
+    if normalized in SOCIAL_INTERACTION_ALIASES:
+        return SOCIAL_INTERACTION_ALIASES[normalized]
+
+    for candidate in SOCIAL_INTERACTION_TYPES:
+        if _normalize_social_key(candidate) == normalized:
+            return candidate
+
+    if _normalize_social_key("summary") == normalized:
+        return "Summary"
+
+    return normalize_str(str(value))
 
 
 def _value_matches(candidate_value, expected_value):
@@ -1496,87 +1665,805 @@ class NGIN_Simulae_Actor(SimulaeNode):
 
         return summary
 
+    def _normalize_social_parties(self, parties):
+        """Return a clean list of interaction partners."""
+
+        if parties is None:
+            return []
+
+        if isinstance(parties, (list, tuple, set)):
+            return [party for party in parties if party]
+
+        return [parties]
+
+    def _summarize_social_party(self, party):
+        """Convert a party into a small serializable summary for history."""
+
+        if not party:
+            return None
+
+        if isinstance(party, dict):
+            return {
+                "id": party.get("id") or party.get("ID"),
+                "name": party.get("name") or party.get(NAME),
+                "nodetype": party.get("nodetype") or party.get(NODETYPE),
+            }
+
+        if isinstance(party, SimulaeNode):
+            return {
+                "id": party.ID,
+                "name": party.get_reference(NAME),
+                "nodetype": party.Nodetype,
+            }
+
+        return {
+            "id": str(party),
+            "name": str(party),
+            "nodetype": None,
+        }
+
+    def _normalize_social_event(self, social_event):
+        """Coerce a loose prompt or response record into a stable dictionary."""
+
+        def pick(source, *keys):
+            if not source:
+                return None
+
+            if isinstance(source, dict):
+                for key in keys:
+                    if key in source and source[key] not in (None, ""):
+                        return source[key]
+                return None
+
+            getter = getattr(source, "get_reference", None)
+            if callable(getter):
+                for key in keys:
+                    value = getter(key)
+                    if value not in (None, ""):
+                        return value
+
+            for key in keys:
+                value = getattr(source, key, None)
+                if value not in (None, ""):
+                    return value
+
+            return None
+
+        qualifiers = {}
+        source_qualifiers = pick(social_event, "qualifiers", "Qualifiers")
+
+        if isinstance(source_qualifiers, dict):
+            for qualifier_name, qualifier_value in source_qualifiers.items():
+                canonical_name = qualifier_name
+                for canonical_candidate in SOCIAL_INTERACTION_QUALIFIERS:
+                    if _normalize_social_key(canonical_candidate) == _normalize_social_key(qualifier_name):
+                        canonical_name = canonical_candidate
+                        break
+                qualifiers[canonical_name] = qualifier_value
+
+        for canonical_candidate in SOCIAL_INTERACTION_QUALIFIERS:
+            qualifier_value = pick(social_event, canonical_candidate, canonical_candidate.lower(), canonical_candidate.casefold())
+            if qualifier_value not in (None, ""):
+                qualifiers.setdefault(canonical_candidate, qualifier_value)
+
+        def summarize(value):
+            if isinstance(value, SimulaeNode):
+                return self._summarize_social_party(value)
+            if isinstance(value, (list, tuple, set)):
+                return [summarize(item) for item in value]
+            return value
+
+        event_type = pick(social_event, "response_type", "event_type", "eventtype", "type")
+        event_subtype = pick(social_event, "response_subtype", "event_subtype", "eventsubtype", "subtype")
+
+        return {
+            "event_type": _canonical_social_type(event_type),
+            "event_subtype": _normalize_social_key(event_subtype) or None,
+            "response_type": _canonical_social_type(pick(social_event, "response_type")) or _canonical_social_type(event_type),
+            "response_subtype": _normalize_social_key(pick(social_event, "response_subtype")) or _normalize_social_key(event_subtype) or None,
+            "domain": pick(social_event, "domain") or qualifiers.get("Domain"),
+            "polarity": pick(social_event, "polarity") or qualifiers.get("Polarity"),
+            "force": pick(social_event, "force") or qualifiers.get("Force"),
+            "honesty": pick(social_event, "honesty") or qualifiers.get("Honesty"),
+            "visibility": pick(social_event, "visibility") or qualifiers.get("Visibility"),
+            "evidence": pick(social_event, "evidence") or qualifiers.get("Evidence"),
+            "authority": pick(social_event, "authority") or qualifiers.get("Authority"),
+            "time": pick(social_event, "time") or qualifiers.get("Time"),
+            "topic": pick(social_event, "topic"),
+            "subject": pick(social_event, "subject"),
+            "claim": pick(social_event, "claim"),
+            "question": pick(social_event, "question"),
+            "source": summarize(pick(social_event, "source", "speaker", "actor")),
+            "target": summarize(pick(social_event, "target", "listener", "recipient")),
+            "sources": summarize(pick(social_event, "sources")) or [],
+            "targets": summarize(pick(social_event, "targets")) or [],
+            "observers": summarize(pick(social_event, "observers")) or [],
+            "qualifiers": qualifiers,
+            "content": summarize(pick(social_event, "content", "payload", "information_target", "inquiry_target")),
+        }
+
+    def _response_candidates_for_event_type(self, event_type):
+        """Return the most plausible response families for a prompt type."""
+
+        if not event_type:
+            return list(SOCIAL_RESPONSE_CANDIDATES["default"])
+
+        return list(SOCIAL_RESPONSE_CANDIDATES.get(event_type, SOCIAL_RESPONSE_CANDIDATES["default"]))
+
+    def _select_response_subtype(self, response_type, social_event, appraisal, conversation_history):
+        """Pick a small subtype label so the response reads like a real act."""
+
+        history = conversation_history if isinstance(conversation_history, list) else []
+        prompt_type = social_event.get("event_type")
+
+        if response_type == "Open":
+            return "acknowledge" if history else "greet"
+
+        if response_type == "Close":
+            if prompt_type in {"Close", "Turn", "Boundary"}:
+                return "farewell"
+            return "withdraw"
+
+        if response_type == "Inform":
+            if prompt_type == "Inquire":
+                return "answer"
+            if appraisal.get("credibility", 0) < 0:
+                return "clarify"
+            return "share"
+
+        if response_type == "Inquire":
+            if prompt_type == "Inform":
+                if appraisal.get("credibility", 0) <= 0:
+                    return "clarify"
+                return "probe"
+            if prompt_type == "Open":
+                return "ask"
+            return "probe"
+
+        if response_type == "Stance":
+            return "agree" if appraisal.get("valence", 0) >= 0 else "refuse"
+
+        if response_type == "Affect":
+            return "praise" if appraisal.get("valence", 0) >= 0 else "criticize"
+
+        if response_type == "Negotiate":
+            return "offer" if appraisal.get("fairness", 0) >= 0 else "counteroffer"
+
+        if response_type == "Boundary":
+            return "set-boundary"
+
+        if response_type == "Coordinate":
+            return "organize"
+
+        if response_type == "Direct":
+            return "request"
+
+        if response_type == "Influence":
+            return "reassure" if appraisal.get("valence", 0) >= 0 else "pressure"
+
+        if response_type == "Deceive":
+            return "conceal"
+
+        if response_type == "Topic":
+            return "stay-topic"
+
+        if response_type == "Summary":
+            return "summarize"
+
+        subtype_options = SOCIAL_RESPONSE_SUBTYPES.get(response_type, SOCIAL_RESPONSE_SUBTYPES["default"])
+        return subtype_options[0] if subtype_options else "share"
+
+    def _resolve_selected_response_content(self, response_type, social_event, appraisal, conversation_history):
+        """Resolve a small payload for information-like responses."""
+
+        def first_non_empty(*values):
+            for value in values:
+                if value not in (None, "", [], {}, ()):
+                    return value
+            return None
+
+        history = conversation_history if isinstance(conversation_history, list) else []
+        qualifiers = social_event.get("qualifiers") or {}
+
+        topic = first_non_empty(
+            social_event.get("topic"),
+            social_event.get("subject"),
+            social_event.get("claim"),
+        )
+        domain = first_non_empty(
+            social_event.get("domain"),
+            qualifiers.get("Domain"),
+        )
+        evidence = first_non_empty(
+            social_event.get("evidence"),
+            qualifiers.get("Evidence"),
+        )
+        question = first_non_empty(
+            social_event.get("question"),
+            social_event.get("content", {}).get("question") if isinstance(social_event.get("content"), dict) else None,
+        )
+        source = first_non_empty(
+            social_event.get("source"),
+            social_event.get("prompt_event", {}).get("source") if isinstance(social_event.get("prompt_event"), dict) else None,
+        )
+        time = first_non_empty(social_event.get("time"), qualifiers.get("Time"))
+
+        if not topic and history:
+            recent = history[-1]
+            if isinstance(recent, dict):
+                recent_prompt = recent.get("prompt_event") if isinstance(recent.get("prompt_event"), dict) else {}
+                recent_response = recent.get("response") if isinstance(recent.get("response"), dict) else {}
+                recent_content = recent_response.get("content") if isinstance(recent_response, dict) else {}
+                topic = first_non_empty(
+                    recent_prompt.get("topic") if isinstance(recent_prompt, dict) else None,
+                    recent_prompt.get("subject") if isinstance(recent_prompt, dict) else None,
+                    recent_prompt.get("claim") if isinstance(recent_prompt, dict) else None,
+                    recent_content.get("topic") if isinstance(recent_content, dict) else None,
+                    recent_content.get("subject") if isinstance(recent_content, dict) else None,
+                )
+
+        base_payload = {
+            "response_type": response_type,
+            "topic": topic,
+            "domain": domain,
+            "subject": social_event.get("subject"),
+            "claim": social_event.get("claim"),
+            "question": question,
+            "evidence": evidence,
+            "time": time,
+            "source": source,
+        }
+
+        if response_type == "Inform":
+            return {
+                **base_payload,
+                "intent": "answer_or_share",
+                "information_target": base_payload,
+            }
+
+        if response_type == "Inquire":
+            if evidence in {"None", "none", "Weak", "weak", None}:
+                intent = "ask_for_evidence"
+            elif not time:
+                intent = "ask_for_timeframe"
+            elif not topic:
+                intent = "ask_for_subject"
+            else:
+                intent = "ask_for_clarification"
+
+            return {
+                **base_payload,
+                "intent": intent,
+                "inquiry_target": base_payload,
+            }
+
+        if response_type == "Open":
+            return {
+                **base_payload,
+                "intent": "greet_or_acknowledge",
+            }
+
+        if response_type == "Close":
+            return {
+                **base_payload,
+                "intent": "terminate_exchange",
+            }
+
+        if response_type == "Stance":
+            return {
+                **base_payload,
+                "intent": "align_or_resist",
+            }
+
+        return {
+            **base_payload,
+            "intent": response_type.lower() if isinstance(response_type, str) else "respond",
+        }
+
     def appraise_social_event(self, social_event):
+        """Turn a social prompt into a compact appraisal record."""
+
+        normalized_event = self._normalize_social_event(social_event)
+        event_type = normalized_event.get("event_type")
+        event_subtype = normalized_event.get("event_subtype")
+        qualifiers = normalized_event.get("qualifiers") or {}
 
         appraisal = {
-            "valence": 0, # how positive or negative is this encounter?
-            "fairness": 0, # how fair or unfair is this encounter?
-            "credibility": 0, # how credible is this encounter?
-            "urgency": 0, # how urgent is this encounter?
-            "intent_hostility": 0, # how hostile do we perceive the intent of this encounter to be?
+            "event_type": event_type,
+            "event_subtype": event_subtype,
+            "qualifiers": qualifiers,
+            "domain": normalized_event.get("domain"),
+            "polarity": normalized_event.get("polarity"),
+            "force": normalized_event.get("force"),
+            "honesty": normalized_event.get("honesty"),
+            "visibility": normalized_event.get("visibility"),
+            "evidence": normalized_event.get("evidence"),
+            "authority": normalized_event.get("authority"),
+            "time": normalized_event.get("time"),
+            "topic": normalized_event.get("topic"),
+            "subject": normalized_event.get("subject"),
+            "claim": normalized_event.get("claim"),
+            "question": normalized_event.get("question"),
+            "source": normalized_event.get("source"),
+            "target": normalized_event.get("target"),
+            "salience": 0,
+            "valence": 0,
+            "fairness": 0,
+            "credibility": 0,
+            "urgency": 0,
+            "intent_hostility": 0,
             "threat": {
-                "physical": 0, # Physical threat (to our body, health, safety, etc)
-                "social": 0, # Social Threat (to our social standing, relationships, etc)
-                "status": 0, # Status Threat (to our power, influence, job, etc)
-                "emotional": 0, # Emotional Threat (to our emotional well-being, mental health, etc)
-                "moral": 0, # Moral Threat (to our values, beliefs, etc)
-                "identity": 0, # Identity Threat (to our sense of self, who we are, etc)
-                "resource": 0 # Resource Threat (to our possessions, money, etc)
+                "physical": 0,
+                "social": 0,
+                "status": 0,
+                "emotional": 0,
+                "moral": 0,
+                "identity": 0,
+                "resource": 0,
             },
         }
 
-        # TODO AE: Calculate appraisal Here
+        def bump(field, amount):
+            appraisal[field] += amount
 
+        def bump_threat(field, amount):
+            appraisal["threat"][field] = max(0, appraisal["threat"][field] + amount)
 
+        # Core interaction families contribute a coarse first-pass interpretation.
+        if event_type == "Open":
+            bump("valence", 3)
+            bump("fairness", 1)
+            bump("credibility", 1)
+            bump("intent_hostility", -2)
+        elif event_type == "Close":
+            bump("valence", -2)
+            bump("urgency", 1)
+            bump_threat("social", 1)
+            bump_threat("emotional", 1)
+        elif event_type == "Turn":
+            bump("urgency", 1)
+            if event_subtype == "interrupt":
+                bump("intent_hostility", 2)
+                bump_threat("social", 1)
+            elif event_subtype == "cede":
+                bump("valence", 1)
+        elif event_type == "Topic":
+            bump("urgency", 1)
+        elif event_type == "Inform":
+            bump("credibility", 1)
+            bump("fairness", 1)
+            if event_subtype == "retract":
+                bump("valence", -1)
+                bump("credibility", -2)
+                bump("intent_hostility", 1)
+        elif event_type == "Inquire":
+            bump("urgency", 1)
+            if event_subtype == "challenge":
+                bump("intent_hostility", 1)
+                bump_threat("social", 1)
+        elif event_type == "Stance":
+            bump("fairness", 1)
+            if event_subtype in {"agree", "accept", "validate"}:
+                bump("valence", 2)
+            elif event_subtype in {"deny", "refuse", "invalidate", "disagree"}:
+                bump("valence", -2)
+                bump("intent_hostility", 1)
+        elif event_type == "Influence":
+            bump("urgency", 1)
+            bump("intent_hostility", 1)
+            if event_subtype in {"reassure", "persuade", "dissuade"}:
+                bump("valence", 1)
+            elif event_subtype in {"pressure", "threaten"}:
+                bump("valence", -2)
+                bump_threat("social", 1)
+                bump_threat("emotional", 1)
+        elif event_type == "Affect":
+            if event_subtype in {"comfort", "commiserate", "praise", "apologize", "joke"}:
+                bump("valence", 2)
+                bump_threat("emotional", 1)
+            elif event_subtype in {"criticize", "insult", "complain"}:
+                bump("valence", -2)
+                bump("intent_hostility", 1)
+                bump_threat("social", 1)
+                bump_threat("emotional", 1)
+        elif event_type == "Direct":
+            bump("urgency", 1)
+            bump_threat("status", 1)
+            if event_subtype in {"demand", "command"}:
+                bump("intent_hostility", 2)
+                bump_threat("social", 1)
+            elif event_subtype in {"request", "delegate"}:
+                bump("valence", -1)
+        elif event_type == "Negotiate":
+            bump("fairness", 2)
+            if event_subtype in {"offer", "volunteer"}:
+                bump("valence", 2)
+            elif event_subtype == "counteroffer":
+                bump("valence", 1)
+        elif event_type == "Boundary":
+            bump("intent_hostility", 1)
+            bump_threat("social", 2)
+            if event_subtype == "set boundary":
+                bump("valence", 1)
+            elif event_subtype == "violate boundary":
+                bump("valence", -3)
+                bump_threat("identity", 1)
+        elif event_type == "Coordinate":
+            bump("urgency", 1)
+            if event_subtype in {"rally", "organize", "promote"}:
+                bump("valence", 2)
+            elif event_subtype in {"demote", "resign"}:
+                bump("valence", -1)
+                bump_threat("status", 1)
+        elif event_type == "Deceive":
+            bump("fairness", -3)
+            bump("credibility", -5)
+            bump("intent_hostility", 3)
+            bump_threat("moral", 2)
+            bump_threat("social", 1)
+        elif event_type == "Summary":
+            bump("credibility", 1)
+
+        # Qualifiers from the wiki provide the nuanced shading.
+        polarity = _normalize_social_key(appraisal["polarity"] or qualifiers.get("Polarity"))
+        if polarity == "positive":
+            bump("valence", 2)
+        elif polarity == "negative":
+            bump("valence", -2)
+            bump("intent_hostility", 1)
+            bump_threat("social", 1)
+
+        force = _normalize_social_key(appraisal["force"] or qualifiers.get("Force"))
+        if force == "high":
+            bump("urgency", 2)
+            bump("intent_hostility", 2)
+            bump_threat("social", 1)
+            bump_threat("emotional", 1)
+        elif force == "medium":
+            bump("urgency", 1)
+            bump("intent_hostility", 1)
+
+        honesty = _normalize_social_key(appraisal["honesty"] or qualifiers.get("Honesty"))
+        if honesty == "truthful":
+            bump("credibility", 2)
+            bump("fairness", 1)
+        elif honesty == "deceptive":
+            bump("credibility", -3)
+            bump("fairness", -2)
+            bump("intent_hostility", 2)
+            bump_threat("moral", 2)
+
+        evidence = _normalize_social_key(appraisal["evidence"] or qualifiers.get("Evidence"))
+        if evidence == "strong":
+            bump("credibility", 2)
+            bump("fairness", 1)
+        elif evidence == "weak":
+            bump("credibility", 1)
+        elif evidence == "none":
+            bump("credibility", -1)
+            bump("urgency", 1)
+
+        visibility = _normalize_social_key(appraisal["visibility"] or qualifiers.get("Visibility"))
+        if visibility == "public" and appraisal["intent_hostility"] > 0:
+            bump_threat("social", 1)
+        elif visibility in {"private", "dyadic"}:
+            bump("intent_hostility", -1)
+
+        authority = _normalize_social_key(appraisal["authority"] or qualifiers.get("Authority"))
+        if authority == "superior":
+            bump("urgency", 1)
+            bump("intent_hostility", -1)
+            bump_threat("status", 1)
+        elif authority == "subordinate":
+            bump_threat("status", 1)
+
+        time_scope = _normalize_social_key(appraisal["time"] or qualifiers.get("Time"))
+        if time_scope in {"future", "ongoing"} and event_type in {"Direct", "Negotiate", "Coordinate"}:
+            bump("urgency", 1)
+        elif time_scope == "past" and event_type in {"Inform", "Inquire"}:
+            bump("credibility", 1)
+
+        domain = _normalize_social_key(appraisal["domain"] or qualifiers.get("Domain"))
+        if domain == "resource":
+            bump_threat("resource", 2)
+            bump("urgency", 1)
+        elif domain == "task":
+            bump("urgency", 1)
+            bump_threat("status", 1)
+        elif domain == "relationship":
+            bump_threat("social", 1)
+            bump_threat("emotional", 1)
+        elif domain == "identity":
+            bump_threat("identity", 1)
+            bump_threat("social", 1)
+        elif domain == "policy":
+            bump_threat("status", 1)
+
+        appraisal["salience"] = max(
+            0,
+            abs(appraisal["valence"]) +
+            abs(appraisal["intent_hostility"]) +
+            appraisal["urgency"] +
+            max(appraisal["threat"].values()),
+        )
 
         return appraisal
     
     def handle_social_interaction(self, social_event, parties, conversation_history):
-        
-        # get appraisal of the social event
-        appraisal = self.appraise_social_event(social_event)
+        """Resolve a prompt, choose a response, and persist the exchange."""
 
-        # determine meaning?
+        normalized_event = self._normalize_social_event(social_event)
+        appraisal = self.appraise_social_event(normalized_event)
+        relevant_parties = self._normalize_social_parties(parties)
 
-        # evaluate response options 
+        # Evaluate candidate responses after the appraisal has reduced the
+        # problem space. The response payload stays shallow so tests can inspect
+        # it without needing to traverse a large event graph.
+        response = self.select_response(
+            normalized_event,
+            appraisal,
+            relevant_parties,
+            conversation_history,
+        )
 
-        # select response
+        if not response:
+            return None
 
-        response = self.select_response(social_event,
-                                        appraisal,
-                                        parties,
-                                        conversation_history)
-        
-        return response
+        record = {
+            "id": str(uuid.uuid4()),
+            "responder": self._summarize_social_party(self),
+            "prompt_event": normalized_event,
+            "prompt_event_type": normalized_event.get("event_type"),
+            "prompt_event_subtype": normalized_event.get("event_subtype"),
+            "appraisal": appraisal,
+            "response": response,
+            "response_type": response.get("response_type"),
+            "response_subtype": response.get("response_subtype"),
+            "response_content": response.get("content"),
+            "parties": [self._summarize_social_party(party) for party in relevant_parties],
+        }
+
+        social_memory = self.Memory.setdefault(SOCIAL, {})
+        social_memory[record["id"]] = record
+
+        if isinstance(conversation_history, list):
+            conversation_history.append(record)
+
+        return record
 
     def select_response(self, # includes emotional state
                         social_event,
                         appraisal,
                         relevant_parties,
                         conversation_history):
+        """Choose the most plausible social response for the current prompt."""
+
+        normalized_event = self._normalize_social_event(social_event)
+        if appraisal is None:
+            appraisal = self.appraise_social_event(normalized_event)
+
+        parties = self._normalize_social_parties(relevant_parties)
+        if not parties:
+            return None
+
+        prompt_type = normalized_event.get("event_type")
+        if not prompt_type:
+            return None
+
+        response_options = self._response_candidates_for_event_type(prompt_type)
+        if not response_options:
+            return None
+
+        history = conversation_history if isinstance(conversation_history, list) else []
+        personality = self.get_personality() or {}
+        politics = self.get_political_beliefs() or {}
+
+        def factor_score(scale, key):
+            factor = scale.get(key) if scale else None
+            if not factor or not isinstance(factor, (tuple, list)) or len(factor) < 2:
+                return 0.0
+
+            try:
+                index, strength = factor
+                return ((float(index) - 3.0) * float(strength)) / 20.0
+            except Exception:
+                return 0.0
+
+        def appraisal_bias(response_type):
+            if response_type == "Open":
+                return appraisal.get("valence", 0) * 2
+            if response_type == "Close":
+                return appraisal.get("intent_hostility", 0) * 2 + appraisal.get("urgency", 0)
+            if response_type == "Inform":
+                return appraisal.get("credibility", 0) * 2 + appraisal.get("fairness", 0)
+            if response_type == "Inquire":
+                return max(0, 3 - appraisal.get("credibility", 0)) + appraisal.get("urgency", 0)
+            if response_type == "Stance":
+                return abs(appraisal.get("intent_hostility", 0)) + abs(appraisal.get("valence", 0))
+            if response_type == "Affect":
+                return (appraisal.get("valence", 0) * 2) - appraisal.get("intent_hostility", 0)
+            if response_type == "Negotiate":
+                return appraisal.get("fairness", 0) + appraisal.get("urgency", 0)
+            if response_type == "Direct":
+                return appraisal.get("urgency", 0) + appraisal.get("intent_hostility", 0)
+            if response_type == "Boundary":
+                return appraisal.get("intent_hostility", 0) + appraisal["threat"]["social"]
+            if response_type == "Coordinate":
+                return appraisal.get("urgency", 0) + appraisal.get("fairness", 0)
+            if response_type == "Influence":
+                return appraisal.get("intent_hostility", 0) + appraisal.get("urgency", 0)
+            if response_type == "Deceive":
+                return max(0, 4 - appraisal.get("credibility", 0)) + appraisal.get("intent_hostility", 0)
+            if response_type == "Topic":
+                return appraisal.get("urgency", 0)
+            if response_type == "Summary":
+                return appraisal.get("credibility", 0)
+            return 0.0
+
+        def history_bias(response_type):
+            if not history:
+                return 0.0
+
+            last_entry = history[-1]
+            if not isinstance(last_entry, dict):
+                return 0.0
+
+            def entry_type(entry, *keys):
+                if not isinstance(entry, dict):
+                    return None
+
+                for key in keys:
+                    value = entry.get(key)
+                    if value not in (None, ""):
+                        return value
+
+                return None
+
+            last_response_type = _canonical_social_type(
+                entry_type(last_entry, "response_type", "event_type", "eventtype", "type")
+            )
+            last_prompt = last_entry.get("prompt_event")
+            last_prompt_type = _canonical_social_type(
+                entry_type(last_prompt, "event_type", "eventtype", "type", "response_type")
+            ) if isinstance(last_prompt, dict) else None
+
+            bias = 0.0
+
+            if prompt_type == "Open":
+                if last_response_type == "Open":
+                    if response_type == "Inquire":
+                        bias += 18
+                    elif response_type == "Inform":
+                        bias += 8
+                    elif response_type == "Open":
+                        bias -= 15
+                elif last_response_type == "Close" and response_type == "Open":
+                    bias += 8
+
+            if prompt_type == "Inform":
+                if last_prompt_type == "Inquire" and last_response_type == "Inform":
+                    if response_type == "Inquire":
+                        bias += 15
+                    elif response_type == "Inform":
+                        bias += 5
+                elif last_response_type == "Inform" and response_type == "Inquire":
+                    bias += 8
+
+            if prompt_type == "Inquire" and last_response_type == "Inform" and response_type == "Inquire":
+                bias += 6
+
+            if response_type == last_response_type:
+                bias -= 2
+
+            return bias
+
+        def personality_bias(response_type):
+            bias = 0.0
+
+            if response_type == "Open":
+                traits = [("Empathy", 0.8), ("Cooperativeness", 0.8), ("Social-Energy", 1.0), ("Trust", 0.4)]
+                policies = [("Diplomacy", 0.2)]
+            elif response_type == "Inform":
+                traits = [("Conscientiousness", 0.9), ("Curiosity", 0.5), ("Trust", 0.4), ("Cognitive-Style", 0.3)]
+                policies = [("Legality", 0.2)]
+            elif response_type == "Inquire":
+                traits = [("Curiosity", 1.0), ("Trust", 0.5), ("Conscientiousness", 0.4)]
+                policies = [("Diplomacy", 0.2)]
+            elif response_type == "Stance":
+                traits = [("Assertiveness", 0.9), ("Conflict-Style", 0.8), ("Conscience", 0.4), ("Trust", -0.3)]
+                policies = [("Legality", 0.2), ("Justice", 0.2)]
+            elif response_type == "Affect":
+                traits = [("Empathy", 1.0), ("Attachment", 0.7), ("Social-Energy", 0.4)]
+                policies = [("Culture", 0.1)]
+            elif response_type == "Negotiate":
+                traits = [("Cooperativeness", 1.0), ("Conscientiousness", 0.4), ("Curiosity", 0.2)]
+                policies = [("Diplomacy", 0.4), ("Legality", 0.1)]
+            elif response_type == "Direct":
+                traits = [("Assertiveness", 0.8), ("Ambition", 0.5), ("Conscientiousness", 0.3)]
+                policies = [("Militancy", 0.3), ("Government", 0.1)]
+            elif response_type == "Boundary":
+                traits = [("Assertiveness", 0.8), ("Resilience", 0.5), ("Trust", -0.2)]
+                policies = [("Legality", 0.4), ("Justice", 0.2)]
+            elif response_type == "Coordinate":
+                traits = [("Conscientiousness", 0.8), ("Cooperativeness", 0.8), ("Social-Energy", 0.3)]
+                policies = [("Government", 0.4), ("Diplomacy", 0.3)]
+            elif response_type == "Influence":
+                traits = [("Assertiveness", 0.7), ("Ambition", 0.4), ("Trust", -0.2)]
+                policies = [("Militancy", 0.3), ("Diplomacy", 0.1)]
+            elif response_type == "Deceive":
+                traits = [("Trust", -1.0), ("Conscience", -0.8), ("Adaptability", 0.2), ("Risk", 0.2)]
+                policies = [("Legality", -0.2)]
+            elif response_type == "Close":
+                traits = [("Resilience", 0.5), ("Conflict-Style", 0.2), ("Trust", -0.1)]
+                policies = [("Diplomacy", 0.1)]
+            else:
+                traits = []
+                policies = []
+
+            for trait_name, weight in traits:
+                bias += factor_score(personality, trait_name) * weight
+
+            for policy_name, weight in policies:
+                bias += factor_score(politics, policy_name) * weight
+
+            return bias
+
         weights = {}
 
-        # get event response options
-        response_options = []
+        for index, response_type in enumerate(response_options):
+            if self.hard_gate(parties, appraisal, response_type, normalized_event, history):
+                continue
 
-        for response in response_options:
-            base_weight = RESPONSE_WEIGHTS[social_event.type].get(response, 1.0)
-            
-            personality_weight = 1.0 # todo AE: calculate personality weight based on NPC's personality traits and the nature of the response (e.g. if response is aggressive, then weight would be higher for NPCs with aggressive traits)
-            political_weight = 1.0 # todo AE: calculate political weight based on NPC's political beliefs and the nature of the response (e.g. if response is politically charged, then weight would be higher for NPCs with strong political beliefs)
-            appraisal_weight = 1.0 # todo AE: calculate appraisal weight based on the NPC's appraisal of the social event and how well the response addresses that appraisal (e.g. if NPC appraises the event as highly threatening, then a response that effectively mitigates that threat would have a higher weight)
-            relationship_weight = 1.0 # todo AE: calculate relationship weight based on the NPC's relationship with the relevant parties and how well the response aligns with that relationship (e.g. if NPC has a close relationship with the instigator of the event, then a response that defends or supports that instigator would have a higher weight)
-            past_interaction_weight = 1.0 # todo AE: calculate past interaction weight based on the NPC's past interactions with the relevant parties and how well the response aligns with those past interactions (e.g. if NPC has had positive interactions with the instigator in the past, then a response that is supportive of the instigator would have a higher weight)
-            conversation_history_weight = 1.0 # todo AE: calculate conversation history weight based on the NPC's conversation history with the relevant parties and how well the response aligns with that conversation history (e.g. if NPC has had a recent argument with the instigator, then a response that de-escalates the situation might have a higher weight)
+            base_weight = 1.0
+            base_score = float((len(response_options) - index) * 10)
+            score = base_score * base_weight
+            score += appraisal_bias(response_type)
+            score += history_bias(response_type)
+            score += personality_bias(response_type)
 
-            # apply modifiers
-            weight = base_weight * personality_weight * political_weight * appraisal_weight * relationship_weight * past_interaction_weight * conversation_history_weight
+            # A tiny tie-breaker keeps earlier candidates stable if all other
+            # factors line up exactly.
+            score += max(0.0, 0.01 * (len(response_options) - index))
 
-            # floor and clamp
-            weight = max(0.001, min(weight, 1000.0))
-            weights[response] = weight
+            weights[response_type] = score
 
-        # select response based on weights
-        if weights:
-            max_value = max(weights.values())
-            max_keys = [k for k, v in weights.items() if v == max_value]   
+        if not weights:
+            return None
 
-            return max_keys[0] if max_keys else None
+        max_value = max(weights.values())
+        max_keys = [response for response, value in weights.items() if value == max_value]
+        if not max_keys:
+            return None
 
-        return None
+        response_type = max_keys[0]
+        response_subtype = self._select_response_subtype(response_type, normalized_event, appraisal, history)
+        return {
+            "response_type": response_type,
+            "response_subtype": response_subtype,
+            "content": self._resolve_selected_response_content(response_type, normalized_event, appraisal, history),
+            "score": max_value,
+            "prompt_event_type": normalized_event.get("event_type"),
+        }
 
     def hard_gate(self, npcs, appraisal, response, social_event, conversation_history):
-        return False # todo AE: implement
+        """Reject responses that are semantically impossible or unsupported."""
+
+        parties = self._normalize_social_parties(npcs)
+        normalized_event = self._normalize_social_event(social_event)
+        prompt_type = normalized_event.get("event_type")
+        response_type = _canonical_social_type(response)
+
+        if not parties:
+            return True
+
+        if not prompt_type or not response_type:
+            return True
+
+        allowed_responses = self._response_candidates_for_event_type(prompt_type)
+        if response_type not in allowed_responses:
+            return True
+
+        return False
     
 
 def get_targets_nearby_node(node, target_criteria, world_state=None, include_adjacent_locations=True):
