@@ -4,7 +4,6 @@ from enum import Enum
 import uuid
 
 from NGIN.NGIN_Socialization import (
-    RESPONSE_WEIGHTS,
     SOCIAL_INTERACTION_QUALIFIERS,
     SOCIAL_INTERACTION_TYPES,
 )
@@ -1625,11 +1624,11 @@ class NGIN_Simulae_Actor(SimulaeNode):
         return bool(self.get_relations_by_criteria(node, relation_types=(CONTENTS, ATTACHMENTS)))
 
 
-    def acquire(self, target: SimulaeNode):
+    def acquire(self, target: SimulaeNode | str):
         """Plan how to obtain a target node or target-like item."""
   
         # do we already have one?
-        if self.has_node(target):
+        if target is SimulaeNode and self.has_node(target):
             return [] # base case -> already have it
 
         actions = self.acquire_vague_target(target)

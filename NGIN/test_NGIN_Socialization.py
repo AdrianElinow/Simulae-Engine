@@ -2,7 +2,6 @@ import unittest
 
 from NGIN.NGIN_AI import NGIN_Simulae_Actor, generate_person
 from NGIN.NGIN_Socialization import (
-    SOCIAL_INTERACTION_QUALIFIERS,
     SOCIAL_INTERACTION_TYPES,
 )
 from NGIN.SimulaeNode import PERSONALITY, POLICY
@@ -94,6 +93,20 @@ class TestNGINSocialization(unittest.TestCase):
         event.update(fields)
         return event
 
+    def _require_text(self, value):
+        """Force an optional scalar into a concrete string."""
+
+        self.assertIsNotNone(value)
+        assert isinstance(value, str)
+        return value
+
+    def _require_dict(self, value):
+        """Force an optional mapping into a concrete dictionary."""
+
+        self.assertIsNotNone(value)
+        assert isinstance(value, dict)
+        return value
+
     def test_appraise_social_event_covers_core_event_types(self):
         """Every core interaction family should appraise without crashing."""
 
@@ -137,6 +150,7 @@ class TestNGINSocialization(unittest.TestCase):
                 )
 
                 self.assertIsNotNone(appraisal)
+                assert appraisal is not None
                 self.assertEqual(appraisal["event_type"], event_type)
                 self.assertIn("threat", appraisal)
                 self.assertGreaterEqual(appraisal["salience"], 0)
@@ -165,9 +179,7 @@ class TestNGINSocialization(unittest.TestCase):
         interaction = self.respondent.handle_social_interaction(prompt, [self.asker], history)
 
         self.assertIsNotNone(interaction)
-
-        if interaction == None:
-            self.fail("Interaction was 'None'")
+        assert interaction is not None
 
         self.assertEqual(interaction["prompt_event_type"], "Inquire")
         self.assertEqual(interaction["response_type"], "Inform")
@@ -197,13 +209,12 @@ class TestNGINSocialization(unittest.TestCase):
 
         first_interaction = self.respondent.handle_social_interaction(prompt, [self.asker], history)
         self.assertIsNotNone(first_interaction)
+        assert first_interaction is not None
 
         follow_up = self.asker.handle_social_interaction(first_interaction["response"], [self.respondent], history)
 
         self.assertIsNotNone(follow_up)
-
-        if follow_up == None:
-            self.fail("follow_up was 'None'")
+        assert follow_up is not None
 
         self.assertEqual(follow_up["prompt_event_type"], "Inform")
         self.assertEqual(follow_up["response_type"], "Inquire")
@@ -213,6 +224,64 @@ class TestNGINSocialization(unittest.TestCase):
         self.assertEqual(len(history), 2)
         self.assertEqual(history[1]["prompt_event_type"], "Inform")
         self.assertEqual(history[1]["response_type"], "Inquire")
+
+    def test_long_conversational_exchange_between_npcs(self):
+        """NPCs should sustain a longer alternating exchange without losing context."""
+
+        history = []
+        current_actor = self.respondent
+        current_partner = self.asker
+        current_event = self._build_prompt(
+            "Inquire",
+            "ask",
+            domain="Identity",
+            subject="origin",
+            topic="origin",
+            question="Where are you from, and what brought you here?",
+            evidence="Weak",
+        )
+
+        seen_response_types = set()
+        seen_topics = set()
+
+        for turn_index in range(10):
+            with self.subTest(turn=turn_index):
+                interaction = self._require_dict(
+                    current_actor.handle_social_interaction(current_event, [current_partner], history)
+                )
+
+                self.assertEqual(len(history), turn_index + 1)
+
+                prompt_type = self._require_text(interaction.get("prompt_event_type"))
+                response_type = self._require_text(interaction.get("response_type"))
+                self.assertIn(prompt_type, SOCIAL_INTERACTION_TYPES)
+                self.assertIn(response_type, SOCIAL_INTERACTION_TYPES)
+                seen_response_types.add(response_type)
+
+                response = self._require_dict(interaction.get("response"))
+                self.assertEqual(self._require_text(response.get("prompt_event_type")), prompt_type)
+                self.assertEqual(self._require_text(response.get("response_type")), response_type)
+
+                content = self._require_dict(response.get("content"))
+                topic = self._require_text(content.get("topic"))
+                self.assertEqual(topic, "origin")
+                seen_topics.add(topic)
+
+                if response_type == "Inform":
+                    information_target = self._require_dict(content.get("information_target"))
+                    self.assertEqual(self._require_text(information_target.get("topic")), "origin")
+                elif response_type == "Inquire":
+                    inquiry_target = self._require_dict(content.get("inquiry_target"))
+                    self.assertEqual(self._require_text(inquiry_target.get("topic")), "origin")
+
+                current_event = response
+                current_actor, current_partner = current_partner, current_actor
+
+        self.assertEqual(len(history), 10)
+        self.assertEqual(seen_topics, {"origin"})
+        self.assertIn("Inform", seen_response_types)
+        self.assertIn("Inquire", seen_response_types)
+        self.assertGreaterEqual(len(seen_response_types), 2)
 
     def test_social_edge_cases(self):
         """Malformed or impossible interactions should fail closed."""
