@@ -156,8 +156,8 @@ class TestSimulaeNodeCore(unittest.TestCase):
         observer.set_relation(inanimate, CONTENTS)
         observer.Relations[POI] = {social.ID: {STATUS: "known"}}
 
-        #self.assertTrue(observer.knows_about(inanimate))
-        #self.assertTrue(observer.knows_about(social))
+        self.assertTrue(observer.knows_about(inanimate))
+        self.assertTrue(observer.knows_about(social))
 
     def test_get_and_set_reference(self):
         node = SimulaeNode(references={NAME: "Before"})
@@ -241,7 +241,7 @@ class TestSimulaeNodeRelations(unittest.TestCase):
         b = SimulaeNode(given_id="obj-5", nodetype=OBJ)
         a.set_relation(b, CONTENTS)
 
-        #self.assertIs(a.get_relation(b), b)
+        self.assertIs(a.get_relation(b), b)
 
     def test_get_relation_by_id_none_for_unknown(self):
         a = SimulaeNode(nodetype=LOC)
@@ -286,6 +286,15 @@ class TestSimulaeNodeRelations(unittest.TestCase):
         a = SimulaeNode()
         self.assertEqual(a.get_relations_by_criteria({"x": 1}), [])
 
+    def test_get_relations_by_criteria_matches_string_and_dict(self):
+        loc = SimulaeNode(nodetype=LOC)
+        food = SimulaeNode(given_id="food-1", nodetype=OBJ, references={NAME: "food"})
+
+        loc.set_relation(food, CONTENTS)
+
+        self.assertEqual(loc.get_relations_by_criteria("food"), [food])
+        self.assertEqual(loc.get_relations_by_criteria({NAME: "food"}), [food])
+
     def test_get_relation_type_has_relation_and_has_relation_to(self):
         a = SimulaeNode(nodetype=LOC)
         b = SimulaeNode(given_id="obj-9", nodetype=OBJ)
@@ -294,8 +303,8 @@ class TestSimulaeNodeRelations(unittest.TestCase):
         self.assertEqual(a.get_relation_type(b), ATTACHMENTS)
         
         # TODO AE: Fix relations tests
-        #self.assertEqual(a.has_relation(b.ID, b.Nodetype), ATTACHMENTS)
-        #self.assertTrue(a.has_relation_to(b))
+        self.assertEqual(a.has_relation(b.ID, b.Nodetype), ATTACHMENTS)
+        self.assertTrue(a.has_relation_to(b))
         self.assertFalse(a.has_relation_to(SimulaeNode(given_id="obj-10", nodetype=OBJ)))
 
     def test_has_relationship(self):
