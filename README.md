@@ -1,6 +1,31 @@
 # CampaignGenerator (Simulae / NGIN)
 
-Adaptive and modular campaign/world generator for RPG scenarios, with a Simulae node model, world generation, and early AI/socialization scaffolding.
+Adaptive and modular campaign/world generator for RPG scenarios, with the 'Simulae' node object model, world generation, and early AI/socialization scaffolding.
+
+## End Goals
+
+The goal of this project is to achieve deterministic algorithms and data-model set that can perpetually dynamically ad-lib simulated worlds with intelligent actors 
+
+These intelligent 'actors' will be able to have individualized:
+- Goals and plans
+    - They will be able to take high-level/vague goals and perform the necessary steps necessary to reach that end-state
+    - Evaluate and act based on their own priorities which may help or inhibit themselves and others.
+- Personalities & opinions that affect their choices and behaviors.
+- Persistent memory of experienced events and information that will affect relationships with other nodes and actors.
+
+All this with the intended goal of being able to use compounding emergent behaviors by stochastic agents to simulate immersive settings and narratives that both exist and self-propagate without, but dynamically and realistically react to, human-input.
+
+> Any setting, any genre, any story, which you can either watch or actively participate in or shape.
+
+Think of similar engines (in the context of interactive media) such as Dwarf Fortress, Rimworld, etc. but with:
+- NPC's with individual personalities (and political opinions) that can be changed over time or by 'experienced' events and determine their behavior
+- Player-driven narratives.
+    - Fulfill any role. Adventurer, Mercenary, Merchant, Diplomat, Inventor, Leader, or just a Farmer
+    - Build their own faction, swaying other NPC's to your favor, and commanding others.
+    - (Re)active actors. Some may betray you, some may become a rival, some may fall in love, others may be won over by your efforts.
+- Dynamic narrative generation
+    - Join a faction, become a leader, start a war, win the war, become King
+    - Start a cult or criminal empire and grow your power and influence.
 
 ## Project Status (Last Verified: February 17, 2026)
 
