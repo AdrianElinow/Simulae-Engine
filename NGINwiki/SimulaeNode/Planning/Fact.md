@@ -1,0 +1,1 @@
+Facts are atomic pieces of information that emerge from [[Simulae Event]]s

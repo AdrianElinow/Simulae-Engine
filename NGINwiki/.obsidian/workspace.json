@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "e739b54a72bcc104",
+        "id": "043bfa549319483d",
         "type": "tabs",
         "children": [
           {
-            "id": "6a4d67036e4bf72e",
+            "id": "a01877165f14491b",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "SimulaeNode/Structure/Memories.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Memories"
+              "title": "New tab"
             }
           }
         ]
@@ -94,7 +90,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SimulaeNode/Structure/Memories.md",
+                "file": "SimulaeNode/Planning/Plan.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +100,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Memories"
+              "title": "Backlinks for Plan"
             }
           },
           {
@@ -113,12 +109,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SimulaeNode/Structure/Memories.md",
+                "file": "SimulaeNode/Planning/Plan.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Memories"
+              "title": "Outgoing links from Plan"
             }
           },
           {
@@ -156,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SimulaeNode/Structure/Memories.md",
+                "file": "SimulaeNode/Planning/Plan.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Memories"
+              "title": "Outline of Plan"
             }
           }
         ]
@@ -183,47 +179,50 @@
       "bases:Create new base": false
     }
   },
-  "active": "6a4d67036e4bf72e",
+  "active": "a01877165f14491b",
   "lastOpenFiles": [
-    "SimulaeNode/Structure/Abilities.md",
     "SimulaeNode/Structure/Scales.md",
     "SimulaeNode/Structure/Relations.md",
-    "SimulaeNode/SimulaeNode.md",
-    "Simulae Event.md",
-    "Simulae.md",
-    "SimulaeNode/Socialization/Social Event.md",
+    "SimulaeNode/Structure/References.md",
+    "SimulaeNode/Structure/Memories.md",
+    "SimulaeNode/Structure/Checks.md",
+    "SimulaeNode/Structure/Attributes.md",
+    "SimulaeNode/Structure/Abilities.md",
     "SimulaeNode/Socialization/Socialization.md",
-    "Untitled.canvas",
+    "SimulaeNode/Socialization/Social Event.md",
+    "SimulaeNode/Socialization/Responses.md",
+    "SimulaeNode/Socialization/Politics Scale.md",
+    "SimulaeNode/Socialization/Personality Scale.md",
     "SimulaeNode/Planning/Task.md",
-    "Gamemodes/Faction Warfare.md",
+    "SimulaeNode/Planning/Task Breakdown.md",
+    "SimulaeNode/Planning/Step.md",
+    "SimulaeNode/Planning/Selector.md",
     "SimulaeNode/Planning/Plan.md",
-    "Gamemodes/Gamemodes.md",
-    "Gamemodes/Escort and Extraction.md",
-    "Gamemodes/Gamemode.md",
-    "Gamemodes/Mystery Investigation.md",
-    "Gamemodes/Bounty Contracts.md",
-    "Gamemodes/Trade and Economy.md",
-    "Gamemodes/Insurgency and Rebellion.md",
-    "Gamemodes/Expedition Crawl.md",
-    "Gamemodes/Survival and Scarcity.md",
-    "Gamemodes/Heist Operations.md",
-    "Gamemodes/Political Intrigue.md",
-    "Gamemodes/Social Deduction/Blood on the Clocktower/Roles/Evil/Demon/Vortox.md",
-    "Gamemodes/Social Deduction/Trouble in Terrorist Town/Yogscast Roles/Traitor/Bad Twin.md",
-    "Gamemodes/Social Deduction/Trouble in Terrorist Town/Yogscast Roles/Yogscast Traitor Roles.md",
-    "Gamemodes/Social Deduction/Blood on the Clocktower/Roles/Townsfolk/Ravenkeeper.md",
-    "Gamemodes/Social Deduction/Trouble in Terrorist Town/Yogscast Roles/Hybrid",
-    "Gamemodes/Social Deduction/Trouble in Terrorist Town/Yogscast Roles/Independent",
-    "Gamemodes/Social Deduction/Trouble in Terrorist Town/Yogscast Roles/Jester",
-    "Gamemodes/Social Deduction/Trouble in Terrorist Town/Yogscast Roles/Traitor",
-    "Gamemodes/Social Deduction/Trouble in Terrorist Town/Yogscast Roles/Innocent",
-    "Gamemodes/Social Deduction/Trouble in Terrorist Town/Yogscast Roles/Detective",
-    "Gamemodes/Social Deduction/Trouble in Terrorist Town/Yogscast Roles",
-    "Gamemodes/Social Deduction/Blood on the Clocktower/Roles/Outsider",
-    "Gamemodes/Social Deduction/Blood on the Clocktower/Scripts",
-    "Gamemodes/Social Deduction/Blood on the Clocktower/Roles/Townsfolk/Information",
-    "Screenshot 2026-02-19 at 4.25.00 PM.png",
+    "SimulaeNode/Planning/Fact.md",
+    "SimulaeNode/Planning/Condition.md",
+    "SimulaeNode/Structure",
+    "SimulaeNode/Socialization",
+    "SimulaeNode/SimulaeNode.md",
+    "SimulaeNode/Simulae Actor.md",
+    "SimulaeNode/Planning",
+    "SimulaeNode",
+    "Gamemodes/Immersive Sim/Aneurism IV/Systems/Limitation.md",
+    "Gamemodes/Immersive Sim/Aneurism IV/Systems/Locker.md",
+    "Gamemodes/Immersive Sim/Aneurism IV/Systems/Scavenging.md",
+    "Gamemodes/Immersive Sim/Aneurism IV/Systems/Night Market.md",
+    "Gamemodes/Immersive Sim/Aneurism IV/Systems/Ration Cycle.md",
+    "NGINwiki/SimulaeNode/Structure",
+    "NGINwiki/SimulaeNode/Socialization",
+    "NGINwiki/SimulaeNode/Planning",
+    "NGINwiki/SimulaeNode",
+    "NGINwiki/WorldGenerator",
+    "NGINwiki/Gamemodes/Untitled",
+    "NGINwiki/images/political-scales-diagram.png",
+    "NGINwiki/images/personality-scales-diagram.png",
+    "Events/Untitled.canvas",
+    "Untitled.canvas",
     "images/political-scales-diagram.png",
-    "images/personality-scales-diagram.png"
+    "images/personality-scales-diagram.png",
+    "Screenshot 2026-02-19 at 4.25.00 PM.png"
   ]
 }
