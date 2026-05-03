@@ -550,7 +550,7 @@ class NGIN_Simulae_Actor(SimulaeNode):
 
         # TODO AE: Calculate appraisal Here
 
-
+        # 
 
         return appraisal
     

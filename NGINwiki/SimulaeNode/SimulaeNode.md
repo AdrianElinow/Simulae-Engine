@@ -35,3 +35,10 @@ The memory system is still under-development
 # Systems
 
 SimulaeNodes intelligently interact with other SimulaeNodes using several important and in-depth systems. 
+
+# Structure
+
+```json
+{
+}
+```

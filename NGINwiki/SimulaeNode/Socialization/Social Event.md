@@ -1,4 +1,4 @@
-[[Social Event]]s are a subtype of a [[Simulae Event]] which specifically relates to the abstract concept of a 'social interaction' codified into a data structure formatted for use a [[Simulae Actor]] (Sentient Simulae Entity) which, through socialization, experiences and generates these events in doing so. 
+[[Social Event]]s are a subtype of a [[Simulae Event]] which specifically relates to the abstract concept of a 'social interaction' codified into a data structure formatted for use a [[SimulaeNode/Simulae Actor]] (Sentient Simulae Entity) which, through socialization, experiences and generates these events in doing so. 
 
 ```mermaid
 flowchart RL
@@ -37,42 +37,13 @@ Qualifiers are important metadata attached to a given [[Social Event]]s that ind
 	- Fact -- A statement describing something. 
 	- Plan -- Describes a [[Plan]]
 	- Task -- An instruction 
-	- Resource -- 
-- Polarity 
-	- Pro- -- Contextually indicates agreement, support, escalation, etc
-	- Anti- -- Contextually indicates disagreement, denial, etc.
-	- Neutral -- No polarity indicated, which itself could be information
-- Force 
-	- None -- No intensity or hostility
-	- Low -- Subtle implications or vague threats
-	- High -- Alarming intensity, overt threats, etc
+	- Resource -- ...
 - Honesty 
 	- Truthful -- 
 	- Deceptive -- 
 	- Uncertain -- 
-- Visibility 
-	- private
-	- dyadic
-	- public
-- Evidence 
-	- None
-	- Weak
-	- Strong
-	- Perfect
 - Emotion -- Expression of a primary or derivative emotion
-	- Joy
-	- Rage
-	- Sadness
-	- Fear
-	- Surprise
-	- Disgust
-	- Love
-	- Anticipation
-	- Contentment
-	- Hope
-	- Shame
-	- Envy
-	- Pride
+	- ...
 - Authority -- The nature of authority between the source and receiver
 	- Peer
 	- Superior
@@ -84,64 +55,158 @@ Qualifiers are important metadata attached to a given [[Social Event]]s that ind
 	- Current
 	- Ongoing 
 	- Future
+		- Immediacy
 	- Past
+		- Recency
 
-## Most-Likely Responses
+### Emotion Wheel
 
-While internally, each response will be evaluated for its merit as a valid response for a given [[Simulae Actor]]s reaction to a prompting [[Social Event]], a smaller set of "most-likely responses" can provide an optimization / shortcut to a possibly more costly calculation.
-#### Most-Likely Responses per given [[Social Event]]
+![[Pasted image 20260418192310.png]]
+- Happy
+	- Playful
+		- Aroused
+		- Cheeky
+	- Content
+		- Free
+		- Joyful
+	- Interested
+		- Curious
+		- Inquisitive
+	- Proud
+		- Successful
+		- Confident
+	- Accepted
+		- Respected
+		- Valued
+	- Powerful
+		- Courageous
+		- Creative
+	- Peaceful
+		- Loving
+		- Thankful
+	- Trusting
+		- Sensitive
+		- Intimate
+	- Optimistic
+		- Hopeful
+		- Inspired
+- Sad
+	- Hurt
+		- Embarrased
+		- Disappointed
+	- Depressed
+		- Inferior
+		- Empty
+	- Guilty
+		- Ashamed
+		- Remorseful
+	- Despair
+		- Grief
+		- Powerless
+	- Vulnerable
+		- Victimized
+		- Fragile
+	- Lonely
+		- Isolated
+		- Abandoned
+- Disgusted
+	- Disapproving
+		- Judgemental
+		- Embarrassed
+	- Disappointed
+		- Appaled
+		- Revolted
+	- Awful
+		- Neauseated
+		- Detestable
+	- Repelled
+		- Horrified
+		- Hesitant
+- Angry
+	- Let Down
+		- Betrayed
+		- Resentful
+	- Humiliated
+		- Disrespected
+		- Ridiculed
+	- Bitter
+		- Indignant
+		- Violated
+	- Mad
+		- Furious
+		- Jealous
+	- Aggressive
+		- Provoked
+		- Annoyed
+	- Frustrated
+		- Infuriated
+		- Annoyed
+	- Distant
+		- Withdrawn
+		- Numb
+	- Critical
+		- Skeptical
+		- Dismissive
+- Fearful
+	- Scared
+		- Helpless
+		- Frightened
+	- Anxious
+		- Overwhelmed
+		- Worried
+	- Insecure
+		- Inadequate
+		- Inferior
+	- Weak
+		- Worthless
+		- Insignificant
+	- Rejected
+		- Excluded
+		- Persecurted
+	- Threatened
+		- Nervous
+		- Exposed
+- Surprised
+	- Startled
+		- Shocked
+		- Dismayed
+	- Confused
+		- Disillusioned
+		- Perplexed
+	- Amazed
+		- Astonished
+		- Awe
+	- Excited
+		- Eager
+		- Energetic
+- Fatigued
+	- Bored
+		- Indifferent
+		- Apathetic
+	- Busy
+		- Pressured
+		- Rushed
+	- Tired
+		- Sleepy
+		- Unfocused
+	- Stressed
+		- Overwhelmed
+		- Out-of-Control
+	
 
-- Open ("Hello!")
-	- Open (response greeting) ("Hey! Good Morning.)
-	- Inquiry ("Who are you? / How was your day?")
-	- Express emotion ("")
-- Close
-	- Close ("Okay, goodbye") 
-	- ...
-- Turn
-	- Interruption
-		- Affect ("Dont you dare interrupt me!")
-		- ...
-	- Cede-Priority
-		- ...
-- Topic
-	- ...
-- Inform (statement, clarification, observation, retraction.)
-	- Inquire ("how do you know that?")
-	- Inform (Provide counter-evidence)
-- Inquire
-	- Inform (answer question)
-	- Deceive (answer question dishonestly)
-	- Phatic (filler/non-answer)
-	- Stance (Refuse to answer)
-	- Inform (ignore and continue)
-- Stance
-	- ...
-- Influence
-	- ...
-- Affect
-	- ....
-- Direct
-	- Request / Demand
-		- Stance (Accept/Deny)
-	- Task
-		- Stance (Accept/Deny)
-		- Inquire (Ask question about given task)
-		- Inform (Task is incorrect)
-		- ...
-	- ...
-- Negotiate
-	- Stance (Accept/Refuse offer)
-	- Negotiate (provide counteroffer)
-	- Inquire ("Are you sure?")
-	- Inform ("I know that this right here...")
-- Coordinate
-	- ...
-- Deceive (Not expressed to other party)
-	- ...
-- Summary
-	- Inform (provide additional detail or clarification)
-	- ...
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### Resolving `Inform` / `Inquire` Content
 
@@ -175,8 +240,3 @@ This separates:
 
 - **Response selection** (what type of act to take)
 - **Content resolution** (what information act to perform)
-
-Implementation reference:
-
-- `NGIN/NGIN_Socialization.py`: `resolve_information_response_payload(...)`
-- `NGIN/NGIN_AI.py`: `resolve_selected_response_content(...)`

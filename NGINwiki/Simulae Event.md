@@ -30,3 +30,28 @@ Event = {
 }
 ```
 
+
+
+```mermaid
+flowchart LR
+	src["Source"]
+	tgt["Target"]
+	obs["Observer"]
+	act(["Action"])
+	
+	src --- act 
+	act --> tgt
+	act -. "Observed by" .-> obs
+
+```
+
+
+
+
+
+
+
+
+
+
+

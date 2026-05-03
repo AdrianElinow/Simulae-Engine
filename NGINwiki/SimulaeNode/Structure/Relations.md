@@ -12,7 +12,7 @@ These relationships are detailed in this structure when they are 'inseparable' f
 
 | ***Relation*** | ***Description***                                                                                                                         |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Components     | The [[SimulaeNodes]] that make-up the given 'Product' [[SimulaeNode]] (ex: the Table-legs and the Table-top which make up a Table object) |
+| Components     | The [[SimulaeNode]]s that make-up the given 'Product' [[SimulaeNode]] (ex: the Table-legs and the Table-top which make up a Table object) |
 | Contents       | The [[SimulaeNode]]s that are held within the 'Containing' [[SimulaeNode]] (ex: gold or loot in a treasure-chest)                         |
 | Accessories    | The [[SimulaeNode]]s that are attached to (externally), but not apart of, the 'Accessorized' [[SimulaeNode]]                              |
 | Adjacents      | The SimulaeNodes that are located 'adjacent' to the given [[SimulaeNode]].                                                                |
