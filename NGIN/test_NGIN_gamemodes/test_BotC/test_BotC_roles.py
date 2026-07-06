@@ -68,7 +68,7 @@ class TestBloodOnTheClocktowerRoles(unittest.TestCase):
 
     def _assert_common_prompt_record(
         self,
-        record: dict[str, object],
+        record: dict[str, object] | None,
         *,
         prompt_type: str,
         relation: str,
@@ -76,6 +76,7 @@ class TestBloodOnTheClocktowerRoles(unittest.TestCase):
         target_name: str,
     ) -> None:
         self.assertIsNotNone(record)
+        assert record is not None
         self.assertEqual(record["prompt_event_type"], prompt_type)
         self.assertIn(record["response_type"], SOCIAL_INTERACTION_TYPES)
 
@@ -145,6 +146,7 @@ class TestBloodOnTheClocktowerRoles(unittest.TestCase):
                 label = policy_disposition_label(source_actor, target_actor)
 
                 self.assertIsNotNone(diff)
+                assert isinstance(diff, int)
                 self.assertEqual(diff, reverse_diff)
                 self.assertEqual(relation, "Friendly" if source.group == target.group else "Hostile")
 

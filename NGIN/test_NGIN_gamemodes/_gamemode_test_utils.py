@@ -23,6 +23,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 TTT_WIKI_ROOT = REPO_ROOT / "NGINwiki" / "Gamemodes" / "Social Deduction" / "Trouble in Terrorist Town" / "Roles"
 BOTC_WIKI_ROOT = REPO_ROOT / "NGINwiki" / "Gamemodes" / "Social Deduction" / "Blood on the Clocktower" / "Roles"
 AIV_WIKI_ROOT = REPO_ROOT / "NGINwiki" / "Immersive Sim" / "Aneurism IV" / "roles"
+HITMAN_WIKI_ROOT = (
+    REPO_ROOT / "NGINwiki" / "Immersive Sim" / "Hitman World of Assassination" / "roles"
+)
 
 
 @dataclass(frozen=True)
@@ -224,6 +227,55 @@ def _aiv_policy_profile(group: str) -> dict[str, tuple[int, int]]:
     return _neutral_policy_profile()
 
 
+def _hitman_policy_profile(group: str) -> dict[str, tuple[int, int]]:
+    if group == "Agency":
+        return _profile_with_overrides(
+            _neutral_policy_profile(),
+            {
+                "Economy": (5, 2),
+                "Diplomacy": (5, 2),
+                "Government": (5, 2),
+                "Justice": (5, 2),
+                "Legality": (5, 2),
+                "Technology": (5, 2),
+            },
+        )
+
+    if group == "Security":
+        return _neutral_policy_profile()
+
+    if group == "Staff":
+        return _profile_with_overrides(
+            _neutral_policy_profile(),
+            {
+                "Economy": (4, 2),
+                "Diplomacy": (4, 2),
+                "Government": (4, 2),
+                "Justice": (4, 2),
+                "Legality": (4, 2),
+                "Technology": (4, 2),
+            },
+        )
+
+    if group == "Civilian":
+        return _profile_with_overrides(
+            _neutral_policy_profile(),
+            {
+                "Economy": (4, 2),
+                "Diplomacy": (4, 2),
+                "Government": (4, 2),
+                "Justice": (4, 2),
+                "Legality": (4, 2),
+                "Technology": (4, 2),
+            },
+        )
+
+    if group == "Target":
+        return _neutral_policy_profile()
+
+    return _neutral_policy_profile()
+
+
 KIND_PERSONALITY_OVERRIDES = {
     "investigative": {
         "Curiosity": (6, 5),
@@ -291,6 +343,51 @@ KIND_PERSONALITY_OVERRIDES = {
         "Trust": (3, 3),
         "Resilience": (4, 3),
     },
+    "infiltrative": {
+        "Curiosity": (5, 4),
+        "Conscientiousness": (5, 4),
+        "Trust": (1, 4),
+        "Social-Energy": (2, 3),
+        "Risk": (5, 4),
+        "Assertiveness": (4, 3),
+    },
+    "handler": {
+        "Empathy": (5, 4),
+        "Trust": (5, 4),
+        "Conscientiousness": (5, 4),
+        "Social-Energy": (4, 3),
+        "Curiosity": (4, 3),
+        "Attachment": (4, 3),
+    },
+    "security": {
+        "Assertiveness": (5, 4),
+        "Conscientiousness": (5, 4),
+        "Trust": (4, 3),
+        "Conflict-Style": (5, 4),
+        "Risk": (4, 3),
+    },
+    "staff": {
+        "Empathy": (5, 4),
+        "Cooperativeness": (5, 4),
+        "Trust": (4, 3),
+        "Conscientiousness": (4, 3),
+        "Social-Energy": (4, 3),
+    },
+    "civilian": {
+        "Curiosity": (4, 3),
+        "Social-Energy": (3, 3),
+        "Trust": (4, 3),
+        "Conscientiousness": (3, 3),
+        "Attachment": (4, 3),
+    },
+    "target": {
+        "Ambition": (5, 4),
+        "Assertiveness": (5, 4),
+        "Trust": (1, 4),
+        "Conscience": (2, 3),
+        "Risk": (5, 4),
+        "Conflict-Style": (4, 3),
+    },
 }
 
 
@@ -335,6 +432,36 @@ KIND_PLANS = {
         "find a body to inhabit",
         "choose a fate",
     ),
+    "infiltrative": (
+        "map the venue",
+        "borrow a disguise",
+        "eliminate the target",
+    ),
+    "handler": (
+        "brief the contract",
+        "monitor the mission",
+        "arrange extraction",
+    ),
+    "security": (
+        "patrol the venue",
+        "question irregularities",
+        "lock down exits",
+    ),
+    "staff": (
+        "serve the venue",
+        "maintain routine",
+        "spot anomalies",
+    ),
+    "civilian": (
+        "move through the venue",
+        "avoid danger",
+        "flee if exposed",
+    ),
+    "target": (
+        "keep to routine",
+        "call for protection",
+        "escape suspicion",
+    ),
 }
 
 
@@ -350,6 +477,8 @@ def _generic_plan_priorities(kind: str, focus: str, summary: str) -> tuple[tuple
 def _kind_to_policy_profile(mode: str, group: str) -> dict[str, tuple[int, int]]:
     if mode in {"ttt", "botc"}:
         return _good_policy_profile() if group == "Good" else _evil_policy_profile()
+    if mode == "hitman":
+        return _hitman_policy_profile(group)
     return _aiv_policy_profile(group)
 
 
@@ -702,6 +831,13 @@ def expected_relation(mode: str, left: RoleSpec, right: RoleSpec) -> str:
     if left.name == right.name:
         return "Friendly"
 
+    if mode == "hitman":
+        if left.group == right.group:
+            return "Friendly"
+        if "Agency" in {left.group, right.group} and {left.group, right.group} & {"Security", "Target"}:
+            return "Hostile"
+        return "Neutral"
+
     if mode in {"ttt", "botc"}:
         return "Friendly" if left.group == right.group else "Hostile"
 
@@ -732,6 +868,36 @@ def expected_relation(mode: str, left: RoleSpec, right: RoleSpec) -> str:
 
 def lead_type_for(mode: str, left: RoleSpec, right: RoleSpec, relation: str | None = None) -> str:
     relation = relation or expected_relation(mode, left, right)
+
+    if mode == "hitman":
+        if relation == "Friendly":
+            return {
+                "infiltrative": "Coordinate",
+                "handler": "Inform",
+                "security": "Coordinate",
+                "staff": "Inform",
+                "civilian": "Open",
+                "target": "Inform",
+            }.get(left.kind, "Inform")
+
+        if relation == "Hostile":
+            return {
+                "infiltrative": "Direct",
+                "handler": "Inquire",
+                "security": "Direct",
+                "staff": "Inquire",
+                "civilian": "Inquire",
+                "target": "Stance",
+            }.get(left.kind, "Direct")
+
+        return {
+            "infiltrative": "Inquire",
+            "handler": "Inform",
+            "security": "Direct",
+            "staff": "Inform",
+            "civilian": "Open",
+            "target": "Inquire",
+        }.get(left.kind, "Inform")
 
     if relation == "Friendly":
         return {
@@ -1093,10 +1259,152 @@ def load_aiv_role_specs() -> tuple[RoleSpec, ...]:
     return tuple(specs)
 
 
+HITMAN_BEHAVIOR = {
+    "Agent 47": {
+        "kind": "infiltrative",
+        "plan": (
+            "study the venue",
+            "borrow a disguise",
+            "eliminate the target",
+        ),
+        "priorities": (
+            "stay unseen",
+            "keep escape options open",
+            "leave no witnesses",
+        ),
+    },
+    "Diana Burnwood": {
+        "kind": "handler",
+        "plan": (
+            "brief the contract",
+            "monitor the mission",
+            "arrange extraction",
+        ),
+        "priorities": (
+            "preserve deniability",
+            "feed 47 the right intel",
+            "keep the contract clean",
+        ),
+    },
+    "Guard": {
+        "kind": "security",
+        "plan": (
+            "patrol the venue",
+            "question irregularities",
+            "lock down exits",
+        ),
+        "priorities": (
+            "protect the target",
+            "control access",
+            "escalate suspicion fast",
+        ),
+    },
+    "Head of Security": {
+        "kind": "security",
+        "plan": (
+            "coordinate patrols",
+            "tighten lockdowns",
+            "seal exits",
+        ),
+        "priorities": (
+            "control the response",
+            "find the intruder",
+            "avoid an embarrassing breach",
+        ),
+    },
+    "Staff Member": {
+        "kind": "staff",
+        "plan": (
+            "serve the venue",
+            "maintain routine",
+            "spot anomalies",
+        ),
+        "priorities": (
+            "keep the place believable",
+            "avoid panic",
+            "stay helpful",
+        ),
+    },
+    "Civilian": {
+        "kind": "civilian",
+        "plan": (
+            "move through the venue",
+            "avoid danger",
+            "flee if exposed",
+        ),
+        "priorities": (
+            "stay alive",
+            "avoid direct involvement",
+            "notice suspicious activity",
+        ),
+    },
+    "Mission Target": {
+        "kind": "target",
+        "plan": (
+            "keep to routine",
+            "call for protection",
+            "escape suspicion",
+        ),
+        "priorities": (
+            "survive the day",
+            "spot intruders",
+            "avoid exposure",
+        ),
+    },
+}
+
+
+@lru_cache(maxsize=None)
+def load_hitman_role_specs() -> tuple[RoleSpec, ...]:
+    specs: list[RoleSpec] = []
+
+    for path in sorted(HITMAN_WIKI_ROOT.rglob("*.md"), key=lambda candidate: candidate.as_posix().lower()):
+        text = path.read_text(encoding="utf-8")
+        alignment = _extract_prefixed_value(text, ("- Alignment:",))
+        faction = _extract_prefixed_value(text, ("- Faction:",))
+        status = _extract_prefixed_value(text, ("- Status:",))
+        if not (alignment or faction or status):
+            continue
+
+        name = _extract_title(text, path.stem)
+        behavior = HITMAN_BEHAVIOR.get(name)
+        if not behavior:
+            continue
+
+        summary = _extract_heading_summary(text, "## World Role") or _extract_heading_summary(text, "## Mission Role")
+        if not summary:
+            summary = _first_nonempty_line(text)
+
+        group = alignment or faction or status or "Neutral"
+        specs.append(
+            _build_role_spec(
+                mode="hitman",
+                name=name,
+                group=group,
+                kind=behavior["kind"],
+                summary=summary,
+                source_path=path,
+                plan=behavior["plan"],
+                priorities=behavior["priorities"],
+                details={
+                    "alignment": alignment,
+                    "faction": faction,
+                    "status": status,
+                    "roles": _extract_prefixed_value(text, ("- Roles:",)),
+                    "tools": _extract_prefixed_value(text, ("- Tools:", "- Signature Gear:", "- Loadout:")),
+                },
+            )
+        )
+
+    return tuple(specs)
+
+
 __all__ = [
     "AIV_BEHAVIOR",
     "AIV_WIKI_ROOT",
     "BOTC_WIKI_ROOT",
+    "HITMAN_BEHAVIOR",
+    "HITMAN_WIKI_ROOT",
     "KIND_PLANS",
     "KIND_PERSONALITY_OVERRIDES",
     "REPO_ROOT",
@@ -1110,6 +1418,7 @@ __all__ = [
     "lead_type_for",
     "load_aiv_role_specs",
     "load_botc_role_specs",
+    "load_hitman_role_specs",
     "load_ttt_role_specs",
     "make_actor",
     "make_actor_map",
