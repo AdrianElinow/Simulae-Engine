@@ -8,10 +8,10 @@ from NGIN.NGIN_Socialization import SOCIAL_INTERACTION_TYPES
 from NGIN.SimulaeConstants import SOCIAL
 
 from .._gamemode_test_utils import (
-    AIV_WIKI_ROOT,
+    HITMAN_WIKI_ROOT,
     expected_relation,
     lead_type_for,
-    load_aiv_role_specs,
+    load_hitman_role_specs,
     make_actor_map,
     policy_diff_value,
     policy_disposition_label,
@@ -34,164 +34,123 @@ PROMPT_DOMAIN_BY_TYPE = {
     "Topic": "Fact",
 }
 
+GROUP_ORDER = {
+    "Agency": 0,
+    "Security": 1,
+    "Staff": 2,
+    "Civilian": 3,
+    "Target": 4,
+}
+
 GROUP_POLICY_EXPECTATIONS = {
-    "Neutral": {
+    "Agency": {
+        "Economy": (5, 2),
+        "Diplomacy": (5, 2),
+        "Government": (5, 2),
+        "Justice": (5, 2),
+        "Legality": (5, 2),
+        "Technology": (5, 2),
+    },
+    "Security": {
         "Economy": (3, 3),
+        "Diplomacy": (3, 3),
         "Government": (3, 3),
+        "Justice": (3, 3),
         "Legality": (3, 3),
         "Militancy": (3, 3),
-        "Justice": (3, 3),
-        "Diplomacy": (3, 3),
+        "Technology": (3, 3),
     },
-    "P.L.F.": {
-        "Economy": (4, 4),
-        "Diplomacy": (5, 4),
-        "Justice": (5, 4),
-        "Legality": (5, 4),
-        "Militancy": (2, 4),
+    "Staff": {
+        "Economy": (4, 2),
+        "Diplomacy": (4, 2),
+        "Government": (4, 2),
+        "Justice": (4, 2),
+        "Legality": (4, 2),
+        "Technology": (4, 2),
     },
-    "M.B.": {
-        "Economy": (5, 4),
-        "Diplomacy": (5, 4),
-        "Justice": (4, 4),
-        "Legality": (5, 4),
-        "Militancy": (2, 4),
+    "Civilian": {
+        "Economy": (4, 2),
+        "Diplomacy": (4, 2),
+        "Government": (4, 2),
+        "Justice": (4, 2),
+        "Legality": (4, 2),
+        "Technology": (4, 2),
     },
-    "Cortex": {
-        "Government": (6, 5),
-        "Legality": (6, 5),
-        "Militancy": (6, 5),
-        "Justice": (5, 4),
-        "Diplomacy": (1, 4),
-    },
-    "Scum": {
-        "Government": (0, 5),
-        "Legality": (0, 5),
-        "Militancy": (5, 5),
-        "Justice": (0, 5),
-        "Diplomacy": (0, 4),
-    },
-    "Spoiler": {
+    "Target": {
         "Economy": (3, 3),
+        "Diplomacy": (3, 3),
         "Government": (3, 3),
+        "Justice": (3, 3),
         "Legality": (3, 3),
         "Militancy": (3, 3),
-        "Justice": (3, 3),
-        "Diplomacy": (3, 3),
+        "Technology": (3, 3),
     },
 }
 
 ROLE_EXPECTATIONS = {
-    "Spirit": {
-        "group": "Neutral",
-        "kind": "observer",
-        "plan": ("find a living fate", "choose a body to possess", "enter active play"),
-        "priorities": ("become a fate", "learn the city's pressures", "stay unbound until possession"),
+    "Agent 47": {
+        "group": "Agency",
+        "kind": "infiltrative",
+        "plan": ("study the venue", "borrow a disguise", "eliminate the target"),
+        "priorities": ("stay unseen", "keep escape options open", "leave no witnesses"),
+        "alignment": "Agency",
+        "faction": "ICA",
+        "status": "Active",
     },
-    "Prole": {
-        "group": "P.L.F.",
-        "kind": "support",
-        "plan": ("work public jobs", "scavenge safely", "keep the city moving"),
-        "priorities": ("earn Anamnecytes", "stay employed", "support the labor flow"),
+    "Diana Burnwood": {
+        "group": "Agency",
+        "kind": "handler",
+        "plan": ("brief the contract", "monitor the mission", "arrange extraction"),
+        "priorities": ("preserve deniability", "feed 47 the right intel", "keep the contract clean"),
+        "alignment": "Agency",
+        "faction": "ICA",
+        "status": "Active",
     },
-    "Liquidator": {
-        "group": "P.L.F.",
-        "kind": "support",
-        "plan": ("repair machinery", "dispose corpses", "burn Rot growths"),
-        "priorities": ("prevent decay", "keep generators alive", "maintain public order"),
+    "Guard": {
+        "group": "Security",
+        "kind": "security",
+        "plan": ("patrol the venue", "question irregularities", "lock down exits"),
+        "priorities": ("protect the target", "control access", "escalate suspicion fast"),
+        "alignment": "Security",
+        "faction": "Venue Security",
+        "status": "Active",
     },
-    "Corpsman": {
-        "group": "P.L.F.",
-        "kind": "support",
-        "plan": ("heal workers", "produce medicine", "restock treatment systems"),
-        "priorities": ("keep bodies functional", "manage blood", "support the labor line"),
+    "Head of Security": {
+        "group": "Security",
+        "kind": "security",
+        "plan": ("coordinate patrols", "tighten lockdowns", "seal exits"),
+        "priorities": ("control the response", "find the intruder", "avoid an embarrassing breach"),
+        "alignment": "Security",
+        "faction": "Venue Security",
+        "status": "Elite",
     },
-    "Dealer": {
-        "group": "M.B.",
-        "kind": "economic",
-        "plan": ("run Night Market orders", "trade goods", "expand DealerNet reach"),
-        "priorities": ("move supply", "build market leverage", "grow Credits"),
+    "Staff Member": {
+        "group": "Staff",
+        "kind": "staff",
+        "plan": ("serve the venue", "maintain routine", "spot anomalies"),
+        "priorities": ("keep the place believable", "avoid panic", "stay helpful"),
+        "alignment": "Staff",
+        "faction": "Venue Staff",
+        "status": "Active",
     },
-    "Banker": {
-        "group": "M.B.",
-        "kind": "economic",
-        "plan": ("store Credits", "fulfill DealerNet orders", "protect wealth between lives"),
-        "priorities": ("secure money", "support market networks", "preserve long-term value"),
+    "Civilian": {
+        "group": "Civilian",
+        "kind": "civilian",
+        "plan": ("move through the venue", "avoid danger", "flee if exposed"),
+        "priorities": ("stay alive", "avoid direct involvement", "notice suspicious activity"),
+        "alignment": "Civilian",
+        "faction": "Public",
+        "status": "Ambient",
     },
-    "Controller": {
-        "group": "Cortex",
-        "kind": "enforcement",
-        "plan": ("patrol the city", "confiscate contraband", "execute Limits"),
-        "priorities": ("maintain order", "pressure dissent", "keep authority visible"),
+    "Mission Target": {
+        "group": "Target",
+        "kind": "target",
+        "plan": ("keep to routine", "call for protection", "escape suspicion"),
+        "priorities": ("survive the day", "spot intruders", "avoid exposure"),
+        "alignment": "Target",
+        "faction": "Contract Principal",
+        "status": "Primary",
     },
-    "Sanitar": {
-        "group": "Cortex",
-        "kind": "enforcement",
-        "plan": ("clean Rot", "repair damaged systems", "support Cortex operations"),
-        "priorities": ("stop decay", "combine maintenance with force", "deny Rot safe ground"),
-    },
-    "Limitator": {
-        "group": "Cortex",
-        "kind": "enforcement",
-        "plan": ("overwhelm resistance", "execute dissent", "deputize allies"),
-        "priorities": ("enforce Limits", "protect Cortex power", "use maximum force when needed"),
-    },
-    "Scumbag": {
-        "group": "Scum",
-        "kind": "aggressive",
-        "plan": ("destroy machinery", "spread disorder", "attack Cortex infrastructure"),
-        "priorities": ("break the city", "build Rot momentum", "survive by chaos"),
-    },
-    "Zealot": {
-        "group": "Scum",
-        "kind": "ritual",
-        "plan": ("feed Ritual Pits", "consecrate members", "turn Rot into faith"),
-        "priorities": ("grow the cult", "weaponize belief", "bind the group to Rot"),
-    },
-    "Rogue": {
-        "group": "Scum",
-        "kind": "deceptive",
-        "plan": ("use defector knowledge", "sabotage from within", "propagate Rot"),
-        "priorities": ("betray institutions", "stay flexible", "exploit enforcement habits"),
-    },
-    "Malpractitioner": {
-        "group": "Scum",
-        "kind": "deceptive",
-        "plan": ("weaponize medicine", "craft atrocity", "support Scum operations"),
-        "priorities": ("corrupt healing", "turn care into harm", "keep the Rot moving"),
-    },
-    "Slave": {
-        "group": "Cortex",
-        "kind": "penalty",
-        "plan": ("obey", "work off debt", "avoid further punishment"),
-        "priorities": ("survive the camp", "reduce debt", "escape the worst outcomes"),
-    },
-    "Vomit Coffin": {
-        "group": "Spoiler",
-        "kind": "penalty",
-        "plan": ("remain hidden", "mark the final corruption", "end the punishment chain"),
-        "priorities": ("avoid further exposure", "stay classified", "signal the cursed state"),
-    },
-}
-
-PERSONALITY_MARKERS = {
-    "observer": ("Curiosity", 4),
-    "support": ("Empathy", 5),
-    "economic": ("Ambition", 4),
-    "enforcement": ("Conscientiousness", 5),
-    "aggressive": ("Conflict-Style", 6),
-    "ritual": ("Loyalty", 5),
-    "deceptive": ("Trust", 1),
-    "penalty": ("Social-Energy", 1),
-}
-
-GROUP_ORDER = {
-    "Neutral": 0,
-    "P.L.F.": 1,
-    "M.B.": 2,
-    "Cortex": 3,
-    "Scum": 4,
-    "Spoiler": 5,
 }
 
 
@@ -204,9 +163,9 @@ def _discover_role_names(root: Path, required_markers: tuple[str, ...]) -> set[s
     return names
 
 
-class TestAneurismIVFates(unittest.TestCase):
+class TestHitmanWorldOfAssassination(unittest.TestCase):
     def setUp(self):
-        self.specs = load_aiv_role_specs()
+        self.specs = load_hitman_role_specs()
         self.actors = make_actor_map(self.specs)
 
     def _expected_domain(self, prompt_type: str) -> str:
@@ -228,6 +187,9 @@ class TestAneurismIVFates(unittest.TestCase):
 
         prompt_event = record["prompt_event"]
         assert isinstance(prompt_event, dict)
+        qualifiers = prompt_event["qualifiers"]
+        assert isinstance(qualifiers, dict)
+
         self.assertEqual(prompt_event["source"], source_name)
         self.assertEqual(prompt_event["target"], target_name)
         self.assertEqual(prompt_event["domain"], self._expected_domain(prompt_type))
@@ -249,9 +211,10 @@ class TestAneurismIVFates(unittest.TestCase):
         self.assertEqual(appraisal["authority"], "Peer")
         self.assertGreater(appraisal["salience"], 0)
 
-    def test_fate_inventory_and_initial_directives(self):
-        expected_names = _discover_role_names(AIV_WIKI_ROOT, ("- Alignment:",)) | _discover_role_names(
-            AIV_WIKI_ROOT, ("- Status:",)
+    def test_role_inventory_and_initial_priorities(self):
+        expected_names = _discover_role_names(
+            HITMAN_WIKI_ROOT,
+            ("- Alignment:", "- Faction:", "- Roles:", "- Status:"),
         )
         actual_names = {spec.name for spec in self.specs}
         self.assertCountEqual(actual_names, expected_names)
@@ -259,19 +222,20 @@ class TestAneurismIVFates(unittest.TestCase):
         for spec in self.specs:
             with self.subTest(role=spec.name):
                 expected = ROLE_EXPECTATIONS[spec.name]
-                self.assertEqual(spec.mode, "aiv")
+                self.assertEqual(spec.mode, "hitman")
                 self.assertEqual(spec.group, expected["group"])
                 self.assertEqual(spec.kind, expected["kind"])
                 self.assertEqual(spec.plan, expected["plan"])
                 self.assertEqual(spec.priorities, expected["priorities"])
                 self.assertTrue(spec.summary)
                 self.assertTrue(spec.source_path.exists())
+                self.assertEqual(spec.details["alignment"], expected["alignment"])
+                self.assertEqual(spec.details["faction"], expected["faction"])
+                self.assertEqual(spec.details["status"], expected["status"])
+                self.assertTrue(spec.details["roles"])
 
                 for key, value in GROUP_POLICY_EXPECTATIONS[spec.group].items():
                     self.assertEqual(spec.policy_profile[key], value)
-
-                marker_name, marker_index = PERSONALITY_MARKERS[spec.kind]
-                self.assertEqual(spec.personality_profile[marker_name][0], marker_index)
 
     def test_pairwise_dispositions_and_social_openers(self):
         for source, target in permutations(self.specs, 2):
@@ -279,14 +243,14 @@ class TestAneurismIVFates(unittest.TestCase):
                 source_actor = self.actors[source.name]
                 target_actor = self.actors[target.name]
 
-                relation = expected_relation("aiv", source, target)
+                relation = expected_relation("hitman", source, target)
                 diff = policy_diff_value(source_actor, target_actor)
                 reverse_diff = policy_diff_value(target_actor, source_actor)
                 label = policy_disposition_label(source_actor, target_actor)
 
                 self.assertIsNotNone(diff)
-                self.assertEqual(diff, reverse_diff)
                 assert isinstance(diff, int)
+                self.assertEqual(diff, reverse_diff)
 
                 if relation == "Friendly":
                     self.assertLessEqual(diff, 10)
@@ -295,13 +259,13 @@ class TestAneurismIVFates(unittest.TestCase):
                     self.assertGreaterEqual(diff, 20)
                     self.assertEqual(label, "Hostile")
                 else:
-                    self.assertLessEqual(diff, 10)
+                    self.assertLess(diff, 20)
                     self.assertIn(label, {"Friendly", "Neutral"})
 
                 before_memory = len(target_actor.Memory.get(SOCIAL, {}))
                 history: list[dict[str, object]] = []
                 relation_out, prompt_type, _, record = simulate_social_encounter(
-                    "aiv",
+                    "hitman",
                     source,
                     target,
                     source_actor,
@@ -310,7 +274,7 @@ class TestAneurismIVFates(unittest.TestCase):
                 )
 
                 self.assertEqual(relation_out, relation)
-                self.assertEqual(prompt_type, lead_type_for("aiv", source, target, relation))
+                self.assertEqual(prompt_type, lead_type_for("hitman", source, target, relation))
                 self.assertEqual(len(history), 1)
                 self._assert_common_prompt_record(
                     record,
@@ -321,7 +285,7 @@ class TestAneurismIVFates(unittest.TestCase):
                 )
                 self.assertEqual(len(target_actor.Memory.get(SOCIAL, {})), before_memory + 1)
 
-    def test_full_city_sprawl_all_fates_together(self):
+    def test_mission_table_round_all_roles_together(self):
         ordered_specs = sorted(self.specs, key=lambda spec: (GROUP_ORDER[spec.group], spec.kind, spec.name))
         history: list[dict[str, object]] = []
         seen_prompt_types: set[str] = set()
@@ -331,7 +295,7 @@ class TestAneurismIVFates(unittest.TestCase):
             target = ordered_specs[(index + 1) % len(ordered_specs)]
             with self.subTest(step=index, source=source.name, target=target.name):
                 relation, prompt_type, _, record = simulate_social_encounter(
-                    "aiv",
+                    "hitman",
                     source,
                     target,
                     self.actors[source.name],
@@ -350,7 +314,7 @@ class TestAneurismIVFates(unittest.TestCase):
                 )
 
         self.assertEqual(len(history), len(ordered_specs))
-        self.assertEqual(seen_relations, {"Neutral", "Friendly", "Hostile"})
+        self.assertEqual(seen_relations, {"Friendly", "Hostile", "Neutral"})
         self.assertGreaterEqual(len(seen_prompt_types), 4)
 
         for spec in ordered_specs:
