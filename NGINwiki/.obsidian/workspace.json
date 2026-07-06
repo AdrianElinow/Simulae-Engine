@@ -4,21 +4,41 @@
     "type": "split",
     "children": [
       {
-        "id": "e739b54a72bcc104",
+        "id": "b32eac467a511f7b",
         "type": "tabs",
         "children": [
           {
-            "id": "6a4d67036e4bf72e",
+            "id": "9a6c07c212eb524b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Immersive Sim/Aneurism IV/roles/Neutral/Corpsman.md",
+                "file": "SimulaeNode/Socialization/Social Event.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Corpsman"
+              "title": "Social Event"
+            }
+          }
+        ]
+      },
+      {
+        "id": "acf0436a34fc0d87",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "22805b7a93279812",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "SimulaeNode/Socialization/Quirks.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Quirks"
             }
           }
         ]
@@ -94,7 +114,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "SimulaeNode/Structure/Memories.md",
+                "file": "SimulaeNode/Planning/Plan.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +124,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Memories"
+              "title": "Backlinks for Plan"
             }
           },
           {
@@ -113,12 +133,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "SimulaeNode/Structure/Memories.md",
+                "file": "SimulaeNode/Planning/Plan.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Memories"
+              "title": "Outgoing links from Plan"
             }
           },
           {
@@ -156,13 +176,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SimulaeNode/Structure/Memories.md",
+                "file": "SimulaeNode/Planning/Plan.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Memories"
+              "title": "Outline of Plan"
             }
           }
         ]
@@ -183,8 +203,50 @@
       "bases:Create new base": false
     }
   },
-  "active": "6a4d67036e4bf72e",
+  "active": "22805b7a93279812",
   "lastOpenFiles": [
+    "SimulaeNode/Socialization/Appraisal.md",
+    "SimulaeNode/Socialization/Quirks.md",
+    "SimulaeNode/Socialization/Social Event.md",
+    "Simulae Event.md",
+    "SimulaeNode/Socialization/Responses.md",
+    "SimulaeNode/Socialization/Gamemode Logic/Social Deduction Logic.md",
+    "SimulaeNode/Socialization/Personality.md",
+    "SimulaeNode/Socialization/Politics.md",
+    "SimulaeNode/Structure/Scales.md",
+    "SimulaeNode/Socialization/Socialization.md",
+    "SimulaeNode/Structure/Memories.md",
+    "Simulae Actor.md",
+    "Pasted image 20260418192310.png",
+    "Pasted image 20260418192057.png",
+    "Gamemodes/Social Deduction/Blood on the Clocktower/Roles/Evil/Demon/Po.md",
+    "Gamemodes/Survival and Scarcity.md",
+    "Gamemodes/Political Intrigue.md",
+    "Gamemodes/Mystery Investigation.md",
+    "Gamemodes/Insurgency and Rebellion.md",
+    "Gamemodes/Bounty Contracts.md",
+    "Gamemodes/Escort and Extraction.md",
+    "Gamemodes/Expedition Crawl.md",
+    "Gamemodes/Faction Warfare.md",
+    "Gamemodes/Gamemodes.md",
+    "Gamemodes/Trade and Economy.md",
+    "SimulaeNode/Planning/Task Breakdown.md",
+    "SimulaeNode/Structure/Abilities.md",
+    "WorldGenerator/Factions.md",
+    "SimulaeNode/Socialization/Gamemode Logic",
+    "Gamemodes/Personal/Untitled",
+    "SimulaeNode/Meredith-Vex-SimulaeNode.json",
+    "SimulaeNode/Structure",
+    "SimulaeNode/Socialization",
+    "SimulaeNode/Planning",
+    "SimulaeNode",
+    "NGINwiki/SimulaeNode/Structure",
+    "NGINwiki/SimulaeNode/Socialization",
+    "NGINwiki/SimulaeNode/Planning",
+    "NGINwiki/images/political-scales-diagram.png",
+    "NGINwiki/images/personality-scales-diagram.png",
+    "Events/Untitled.canvas",
+    "Untitled.canvas",
     "Immersive Sim/Aneurism IV/roles/Neutral/Banker.md",
     "Immersive Sim/Aneurism IV/roles/Neutral/Corpsman.md",
     "Immersive Sim/Aneurism IV/roles/Neutral/Dealer.md",
@@ -221,6 +283,7 @@
     "Untitled.canvas",
     "Screenshot 2026-02-19 at 4.25.00 PM.png",
     "images/political-scales-diagram.png",
-    "images/personality-scales-diagram.png"
+    "images/personality-scales-diagram.png",
+    "Screenshot 2026-02-19 at 4.25.00 PM.png"
   ]
 }

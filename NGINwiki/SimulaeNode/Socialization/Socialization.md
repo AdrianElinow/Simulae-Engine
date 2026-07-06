@@ -15,6 +15,7 @@ sequenceDiagram
 	
 ```
 
+
 ### Starting social engagements
 
 While one might expect social interactions to always begin with an 'open' or 'greet' action, that is not always the case in reality. Often we begin engagements by other kinds of actions. 
@@ -34,7 +35,7 @@ An inexhaustive list of Termination Cases:
 		- A status attribute has exceeded a specific threshold
 			- Stress-level has risen too high (stressful conversation may trigger an entity's shutdown)
 			- Perceived value of continuing the conversation has declined (not worth arguing with someone and getting nowhere, for example)
-		- [[Simulae Actor]] may decide to end the conversation to begin/continue pursuing a [[Task]] or executing a [[Plan]] (gotta get back to work)
+		- [[SimulaeNode/Simulae Actor]] may decide to end the conversation to begin/continue pursuing a [[Task]] or executing a [[Plan]] (gotta get back to work)
 		- ...
 - An interrupting event occurs that immediately demands the attention of one or all of the participants
 	- An alarming event such as an ambush (sudden engagement of hostile violent action)

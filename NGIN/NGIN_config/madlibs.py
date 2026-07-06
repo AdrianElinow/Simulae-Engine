@@ -19,24 +19,21 @@ POLICY_SCALE = {
 }
 
 PERSONALITY_SCALE = {
-    "Loyalty": ["Rebellious", "Subversive", "Independent", "Indifferent", "Conformist", "Loyal", "Zealous"],
-    "Ambition": ["Self-Sabotaging", "Apathetic", "Unmotivated", "Steady", "Driven", "Ambitious", "Messianic"],
-    "Empathy": ["Sadistic", "Callous", "Apathetic", "Neutral", "Sympathetic", "Empathetic","Altrustic"],
-    "Emotionality": ["Volatile","Reactive","Intense","Neutral","Calm","Flat","Cold"],
-    "Risk": ["Risk-Averse", "Guarded", "Cautious", "Balanced", "Adventurous", "Daring", "Reckless"],
-    "Conscience": ["Immoral", "Amoral", "Rational", "Pragmatic", "Ethical", "Idealistic", "Virtuous"],
+    "Aggreeableness": ["Hostile", "Unfriendly", "Aloof", "Neutral", "Friendly", "Agreeable", "Compassionate"],
+    "Extroversion": ["Reclusive","Withdrawn","Quiet","Neutral","Sociable","Gregarious","Attention-Seeking"],
     "Conscientiousness": ["Negligent", "Careless", "Irresponsible", "Neutral", "Reliable", "Conscientious", "Perfectionist"],
-    "Curiosity": ["Closed-Minded", "Indifferent", "Interested", "Curious", "Inquisitive", "Investigative", "Obsessive"],
-    "Trust": ["Paranoid", "Distrustful", "Skeptical", "Neutral", "Trusting", "Very Trusting", "Gullible"],
-    "Resilience": ["Fragile", "Sensitive", "Stressed", "Stable", "Resilient", "Tough", "Unshakeable"],
-    "Assertiveness": ["Passive", "Submissive", "Reserved", "Neutral", "Assertive", "Commanding", "Overbearing"],
-    "Conflict-Style": ["Avoidant", "Passive-Aggressive", "Diplomatic", "Neutral", "Confrontational", "Aggressive", "Violent"],
-    "Humor": ["Dry", "Serious", "Reserved", "Neutral", "Witty", "Joker", "Clownish"],
-    "Adaptability": ["Rigid", "Inflexible", "Cautious", "Neutral", "Flexible", "Adaptive", "Fluid"],
-    "Attachment": ["Avoidant", "Detached", "Reserved", "Neutral", "Affectionate", "Dependent", "Obsessive"],
+    "Neuroticism": ["Cold", "Stable", "Calm", "Neutral", "Sensitive", "Anxious", "Fragile"],
+    "Openness": ["Closed-Minded", "Conventional", "Traditional", "Neutral", "Inquisitive", "Investigative", "Obsessive"],
+
+    "Loyalty": ["Rebellious", "Subversive", "Independent", "Indifferent", "Conformist", "Loyal", "Zealous"],
+    "Ambition": ["Selfless", "Apathetic", "Unmotivated", "Steady", "Ambitious", "Selfish", "Messianic"],
+    "Empathy": ["Sadistic", "Callous", "Apathetic", "Neutral", "Sympathetic", "Empathetic","Altrustic"],
+    "Conscience": ["Immoral", "Amoral", "Rational", "Pragmatic", "Ethical", "Idealistic", "Virtuous"],
+    "Trust": ["Paranoid", "Distrustful", "Skeptical", "Neutral", "Unsuspicious", "Trusting", "Gullible"],
+    "Humor": ["Humorless", "Dry", "Reserved", "Neutral", "Witty", "Joker", "Clownish"],
+    "Attachment": ["Avoidant", "Detached", "Reserved", "Neutral", "Affectionate", "Anxious", "Obsessive"],
+        
     "Cognitive-Style": ["Concrete", "Practical", "Analytical", "Balanced", "Abstract", "Systems-Oriented", "Visionary"],
-    "Cooperativeness": ["Contrarian","Competitive","Hard-Nosed","Neutral","Agreeable","Collaborative","Self-Effacing"],
-    "Social-Energy": ["Reclusive","Withdrawn","Quiet","Neutral","Sociable","Gregarious","Attention-Seeking"],
 }
 
 DERIVATIVES_SCALE = {
@@ -46,7 +43,10 @@ DERIVATIVES_SCALE = {
     "Manipulativeness": ["-Attachment", "-Empathy", "+Ambition"],
     "Confidence": ["+Assertiveness", "+Resilience", "-Emotionality", "+Risk", "+Adaptability"],
     "Mercifulness": ["+Empathy", "+Justice", "-Ambition", "-Risk", "+Conscience"],
-    "Cruelty": ["-Empathy", "-Justice", "+Ambition", "+Risk", "-Conscience"]
+    "Cruelty": ["-Empathy", "-Justice", "+Ambition", "+Risk", "-Conscience"],
+    
+    "Risk": ["Risk-Averse", "Guarded", "Cautious", "Balanced", "Adventurous", "Daring", "Reckless"],
+    
 }
 
 PRESET_POLICIES = {
