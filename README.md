@@ -46,6 +46,7 @@ Think of similar engines (in the context of interactive media) such as Dwarf For
 ### AI / Socialization
 - [x] `NGIN_Simulae_Actor` planning/prioritization scaffolding in `NGIN/NGIN_AI.py`
 - [x] Basic status-need checks (hunger/thirst/exhaustion/etc.)
+- [x] Task planning and execution loop for survival needs and simple acquisition
 - [ ] Encounter appraisal pipeline (`appraise_event`, `appraise_encounter`) implementation
 - [ ] Social interaction appraisal/response ranking implementation
 
