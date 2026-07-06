@@ -481,10 +481,170 @@ class SimulaeNode:
         
         return True
 
-    def get_relations_by_criteria(self: SimulaeNode, criteria):
+    def get_relations_by_criteria(self: SimulaeNode, criteria, relation_types: list[str] | tuple[str, ...] | None = None):
+        """Return physical relations that match a loose search criteria.
+
+        Criteria can be a string, a `SimulaeNode`, or a dictionary of field
+        matches. This is intentionally forgiving so task planning can search by
+        fuzzy labels like `"food"` or structured selectors like `{NAME: "food"}`.
+        """
+
         logAll("get_relations_by_criteria(",criteria,")")
-        
-        return [] # TODO AE: implement 
+
+        if not criteria:
+            return []
+
+        if relation_types is None:
+            relation_types = tuple(self.Relations.keys())
+
+        def values_match(candidate_value, expected_value):
+            if expected_value is None:
+                return candidate_value is None
+
+            if isinstance(expected_value, SimulaeNode):
+                return (
+                    isinstance(candidate_value, SimulaeNode)
+                    and candidate_value.ID == expected_value.ID
+                    and candidate_value.Nodetype == expected_value.Nodetype
+                )
+
+            if isinstance(expected_value, dict):
+                if not isinstance(candidate_value, dict):
+                    return False
+                return all(values_match(candidate_value.get(key), value) for key, value in expected_value.items())
+
+            if isinstance(expected_value, (list, tuple, set)):
+                return any(values_match(candidate_value, value) for value in expected_value)
+
+            expected_text = normalize_str(str(expected_value)).casefold()
+            candidate_text = normalize_str(str(candidate_value)).casefold()
+            return candidate_text == expected_text
+
+        def node_matches(candidate: SimulaeNode) -> bool:
+            if isinstance(criteria, SimulaeNode):
+                if criteria.Nodetype and candidate.Nodetype != criteria.Nodetype:
+                    return False
+
+                criteria_name = criteria.get_reference(NAME)
+                candidate_name = candidate.get_reference(NAME)
+
+                # Treat ID or NAME as a valid anchor so callers can pass either
+                # an exact node or a named template.
+                if criteria.ID and candidate.ID == criteria.ID:
+                    return True
+
+                if criteria_name and candidate_name and normalize_str(candidate_name).casefold() == normalize_str(criteria_name).casefold():
+                    return True
+
+                if criteria.ID and criteria_name:
+                    return False
+
+                if criteria.ID and candidate.ID != criteria.ID:
+                    return False
+
+                if criteria_name and normalize_str(candidate_name).casefold() != normalize_str(criteria_name).casefold():
+                    return False
+
+                return True
+
+            if isinstance(criteria, str):
+                criteria_text = normalize_str(criteria).casefold()
+
+                candidate_strings = [
+                    candidate.ID,
+                    candidate.Nodetype,
+                    candidate.get_reference(NAME),
+                ]
+                candidate_strings.extend(candidate.References.values())
+                candidate_strings.extend(candidate.Attributes.values())
+                candidate_strings.extend(candidate.Checks.keys())
+                candidate_strings.extend(candidate.Checks.values())
+
+                for candidate_value in candidate_strings:
+                    if candidate_value is None:
+                        continue
+                    if normalize_str(str(candidate_value)).casefold() == criteria_text:
+                        return True
+                return False
+
+            if isinstance(criteria, dict):
+                for key, expected_value in criteria.items():
+                    if key == ID:
+                        if not values_match(candidate.ID, expected_value):
+                            return False
+                        continue
+
+                    if key == NODETYPE:
+                        if not values_match(candidate.Nodetype, expected_value):
+                            return False
+                        continue
+
+                    if key == NAME:
+                        if not values_match(candidate.get_reference(NAME), expected_value):
+                            return False
+                        continue
+
+                    if key == REFERENCES:
+                        if not values_match(candidate.References, expected_value):
+                            return False
+                        continue
+
+                    if key == ATTRIBUTES:
+                        if not values_match(candidate.Attributes, expected_value):
+                            return False
+                        continue
+
+                    if key == CHECKS:
+                        if not values_match(candidate.Checks, expected_value):
+                            return False
+                        continue
+
+                    if key == ABILITIES:
+                        if not values_match(candidate.Abilities, expected_value):
+                            return False
+                        continue
+
+                    # Fall back to direct lookups across the node's primary
+                    # data buckets so callers can search with loose selectors.
+                    if key in candidate.References:
+                        if not values_match(candidate.References.get(key), expected_value):
+                            return False
+                        continue
+
+                    if key in candidate.Attributes:
+                        if not values_match(candidate.Attributes.get(key), expected_value):
+                            return False
+                        continue
+
+                    if key in candidate.Checks:
+                        if not values_match(candidate.Checks.get(key), expected_value):
+                            return False
+                        continue
+
+                    if key in candidate.Abilities:
+                        if not values_match(candidate.Abilities.get(key), expected_value):
+                            return False
+                        continue
+
+                    return False
+
+                return True
+
+            return values_match(candidate, criteria)
+
+        matches = []
+        seen_ids = set()
+
+        for relation_type in relation_types:
+            nodetype_lookup = self.Relations.get(relation_type, {})
+
+            for nodes in nodetype_lookup.values():
+                for candidate in nodes.values():
+                    if candidate and candidate.ID not in seen_ids and node_matches(candidate):
+                        seen_ids.add(candidate.ID)
+                        matches.append(candidate)
+
+        return matches
     
     def get_relation_type(self: SimulaeNode, node: SimulaeNode) -> str | None:
         logAll("get_relation_type(",node,")")
@@ -519,8 +679,9 @@ class SimulaeNode:
 
             relations_by_type = self.get_relations_by_type(relation_type)
 
-            if relations_by_type and node_id in relations_by_type.keys():
-                return relation_type
+            if relations_by_type and nodetype in relations_by_type:
+                if node_id in relations_by_type[nodetype]:
+                    return relation_type
 
     
     def has_relationship( self: SimulaeNode, key: str, nodetype: str ):
