@@ -1,35 +1,52 @@
+from pathlib import Path
+
 from flask import Flask, jsonify
 from flask_cors import CORS
-import sys, os
+from NGIN.NGIN import NGIN
+from NGIN.utilities.lib.ngin_utils import load_json_from_file
 
-# Ensure repo root is on sys.path
-root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if root not in sys.path:
-    sys.path.insert(0, root)
 
-# Import NGIN classes; try package-relative first, fall back to top-level imports
-try:
-    from .SimulaeCampaignGenerator import NGIN
-    from .NGIN_utils.ngin_utils import load_json_from_file
-except Exception:
-    from SimulaeCampaignGenerator import NGIN
-    from NGIN_utils.ngin_utils import load_json_from_file
+REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
+ALLOWED_ORIGINS = ["http://127.0.0.1:5173", "http://localhost:5173"]
 
-app = Flask(__name__)
-CORS(app, resources={r"/generate_campaign": {"origins": ["http://127.0.0.1:3000", "http://localhost:3000", "http://localhost:5173"]}})
 
-@app.route('/')
-def index():
-    return jsonify({"message": "NGIN Campaign Generator API is running."})
+def create_app(test_config=None):
+    app = Flask(__name__)
+    app.config.from_mapping(TESTING=False)
+    if test_config:
+        app.config.update(test_config)
 
-@app.route('/generate_campaign')
-def generate_campaign():
-    mission_struct = load_json_from_file("NGIN/NGIN_config/story_struct.json")
-    ngin_settings = load_json_from_file("NGIN/NGIN_config/ngin_settings.json")
+    CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS}})
 
-    ngin = NGIN(mission_struct, ngin_settings, is_console=False)
-    data = ngin.state.toJSON()
-    return jsonify(data)
+    @app.get("/api")
+    def index():
+        return jsonify({
+            "message": "NGIN Campaign Generator API is running.",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/api/generate_campaign",
+                    "summary": "Generate a new campaign world state.",
+                }
+            ],
+        })
+
+    @app.get("/api/generate_campaign")
+    def generate_campaign():
+        mission_struct = load_json_from_file(
+            "NGIN_config/story_struct.json", filepath=str(REPOSITORY_ROOT / "NGIN")
+        )
+        ngin_settings = load_json_from_file(
+            "NGIN_config/ngin_settings.json", filepath=str(REPOSITORY_ROOT / "NGIN")
+        )
+
+        ngin = NGIN(mission_struct, ngin_settings, is_console=False)
+        return jsonify(ngin.state.toJSON())
+
+    return app
+
+
+app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True)

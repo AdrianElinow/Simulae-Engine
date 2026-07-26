@@ -1,79 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color: #e6ecf8;
+  background: #0b1020;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+* { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
+body { min-width: 320px; min-height: 100vh; margin: 0; }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+button, select { font: inherit; }
+button { cursor: pointer; }
+button:disabled, select:disabled { cursor: wait; opacity: 0.65; }
+code, pre { font-family: 'DM Mono', ui-monospace, monospace; }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+.api-console { width: min(980px, calc(100% - 2rem)); margin: 0 auto; padding: 4rem 0; }
+.hero { margin-bottom: 2rem; }
+.hero h1, .section-heading h2 { margin: 0; letter-spacing: -0.035em; }
+.hero h1 { font-size: clamp(2.5rem, 8vw, 4.8rem); }
+.hero p:last-child { max-width: 44rem; color: #aab7d3; }
 
-.card {
-  padding: 2em;
-}
+.eyebrow { margin: 0 0 0.45rem; color: #62d7c0; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; }
+.endpoint-card, .response-card { margin-top: 1rem; padding: 1.5rem; border: 1px solid #2b3856; border-radius: 1rem; background: #111a30; box-shadow: 0 16px 48px rgb(0 0 0 / 18%); }
+.section-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
+.section-heading h2 { font-size: 1.35rem; }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+.endpoint-picker { display: grid; gap: 0.5rem; margin: 1.75rem 0 1rem; color: #b6c2da; font-size: 0.9rem; }
+.endpoint-picker select { width: 100%; padding: 0.85rem 1rem; border: 1px solid #405170; border-radius: 0.55rem; color: #f1f5ff; background: #0b1020; }
+.operation-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; min-height: 3.5rem; padding: 0.8rem 1rem; border-radius: 0.55rem; color: #b6c2da; background: #0b1020; }
+.operation-summary code { color: #f1f5ff; }
+.method, .status { display: inline-block; padding: 0.3rem 0.55rem; border-radius: 0.35rem; color: #09221c; background: #62d7c0; font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 500; }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.send-button, .secondary-button { border: 0; border-radius: 0.55rem; font-weight: 700; }
+.send-button { width: 100%; margin-top: 1rem; padding: 0.9rem 1.2rem; color: #09221c; background: #62d7c0; }
+.secondary-button { padding: 0.65rem 0.8rem; color: #c8d4eb; background: #202d48; font-size: 0.85rem; }
+.send-button:hover:not(:disabled) { background: #8ce7d3; }
+.secondary-button:hover:not(:disabled) { background: #2c3d5e; }
+
+.status { color: #0b1e4c; background: #91b4ff; white-space: nowrap; }
+.status.failed { color: #3d1217; background: #ff9e9e; }
+.error { margin: 1rem 0 0; padding: 0.8rem 1rem; border-radius: 0.55rem; color: #ffcfcd; background: #3c2029; }
+pre { min-height: 11rem; margin: 1rem 0 0; padding: 1rem; overflow: auto; border-radius: 0.55rem; color: #cfe0ff; background: #0b1020; font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; }
+
+@media (max-width: 560px) {
+  .api-console { padding: 2rem 0; }
+  .endpoint-card, .response-card { padding: 1.1rem; }
+  .section-heading { align-items: stretch; flex-direction: column; }
+  .secondary-button { width: 100%; }
 }

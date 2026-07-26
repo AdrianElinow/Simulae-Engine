@@ -84,7 +84,6 @@ Assorted story arcs (generated and from irl media) framed in mission-generator f
     - Local Gov.
 - Companies/Corporations
     - Corporate War / Sabotage Plot
-
 	- Transportation
 	- Agriculture
 	- Manufacturing
