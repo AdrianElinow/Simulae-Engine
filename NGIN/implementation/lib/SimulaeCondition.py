@@ -5,7 +5,7 @@ from typing import Any
 from .SimulaeNode import SimulaeNode
 from NGIN.utilities.lib.SimulaeConstants import *
 
-class SimulaeConditionRule(Enum):
+class ConditionRule(Enum):
     EXISTS = 1,
     NOT_EXISTS = 2,
     EQUALS = 3,
@@ -21,13 +21,13 @@ class SimulaeConditionRule(Enum):
     REGEX_MATCHES = 13,
     LIST_CONTAINS = 14,
 
-BASIC_RULES = [SimulaeConditionRule.EXISTS, SimulaeConditionRule.NOT_EXISTS]
-NUMERIC_RULES = [SimulaeConditionRule.EQUALS, SimulaeConditionRule.NOT_EQUALS,
-                 SimulaeConditionRule.LESS_THAN, SimulaeConditionRule.LESS_THAN_OR_EQUAL,
-                 SimulaeConditionRule.GREATER_THAN, SimulaeConditionRule.GREATER_THAN_OR_EQUAL,
-                 SimulaeConditionRule.WITHIN_RANGE, SimulaeConditionRule.BEYOND_RANGE]
-STRING_RULES = [SimulaeConditionRule.STRING_CONTAINS, SimulaeConditionRule.STRING_MATCHES, SimulaeConditionRule.REGEX_MATCHES]
-LIST_RULES = [SimulaeConditionRule.LIST_CONTAINS]
+BASIC_RULES = [ConditionRule.EXISTS, ConditionRule.NOT_EXISTS]
+NUMERIC_RULES = [ConditionRule.EQUALS, ConditionRule.NOT_EQUALS,
+                 ConditionRule.LESS_THAN, ConditionRule.LESS_THAN_OR_EQUAL,
+                 ConditionRule.GREATER_THAN, ConditionRule.GREATER_THAN_OR_EQUAL,
+                 ConditionRule.WITHIN_RANGE, ConditionRule.BEYOND_RANGE]
+STRING_RULES = [ConditionRule.STRING_CONTAINS, ConditionRule.STRING_MATCHES, ConditionRule.REGEX_MATCHES]
+LIST_RULES = [ConditionRule.LIST_CONTAINS]
 
 class SimulaeCondition(SimulaeNode):
 
@@ -39,7 +39,7 @@ class SimulaeCondition(SimulaeNode):
             nodetype=CND,
         )
 
-        self.rule: SimulaeConditionRule = SimulaeConditionRule.EXISTS
+        self.rule: ConditionRule = ConditionRule.EXISTS
         self.value: Any = None
         self.property: list[str] = []
 
@@ -69,9 +69,9 @@ class SimulaeCondition(SimulaeNode):
 
     def evaluate_basic(self, subject) -> bool:
         
-        if self.rule == SimulaeConditionRule.EXISTS:
+        if self.rule == ConditionRule.EXISTS:
             return subject is not None
-        elif self.rule == SimulaeConditionRule.NOT_EXISTS:
+        elif self.rule == ConditionRule.NOT_EXISTS:
             return subject is None
         else:
             raise ValueError(f"Invalid rule for basic evaluation: {self.rule}")
@@ -80,23 +80,23 @@ class SimulaeCondition(SimulaeNode):
         if not isinstance(subject_value, (int, float)):
             raise ValueError(f"Subject value must be numeric for numeric evaluation, got: {subject_value}")
         
-        if self.rule == SimulaeConditionRule.EQUALS:
+        if self.rule == ConditionRule.EQUALS:
             return (subject_value == self.value)
-        elif self.rule == SimulaeConditionRule.NOT_EQUALS:
+        elif self.rule == ConditionRule.NOT_EQUALS:
             return (subject_value != self.value)
-        elif self.rule == SimulaeConditionRule.LESS_THAN:
+        elif self.rule == ConditionRule.LESS_THAN:
             return (subject_value < self.value)
-        elif self.rule == SimulaeConditionRule.LESS_THAN_OR_EQUAL:
+        elif self.rule == ConditionRule.LESS_THAN_OR_EQUAL:
             return (subject_value <= self.value)
-        elif self.rule == SimulaeConditionRule.GREATER_THAN:
+        elif self.rule == ConditionRule.GREATER_THAN:
             return (subject_value > self.value)
-        elif self.rule == SimulaeConditionRule.GREATER_THAN_OR_EQUAL:
+        elif self.rule == ConditionRule.GREATER_THAN_OR_EQUAL:
             return (subject_value >= self.value)
-        elif self.rule == SimulaeConditionRule.WITHIN_RANGE:
+        elif self.rule == ConditionRule.WITHIN_RANGE:
             if isinstance(self.value, (list, tuple)) and len(self.value) == 2:
                 lower_bound, upper_bound = self.value
                 return (lower_bound <= subject_value <= upper_bound)
-        elif self.rule == SimulaeConditionRule.BEYOND_RANGE:
+        elif self.rule == ConditionRule.BEYOND_RANGE:
             if isinstance(self.value, (list, tuple)) and len(self.value) == 2:
                 lower_bound, upper_bound = self.value
                 return ((subject_value < lower_bound) or (subject_value > upper_bound))
@@ -109,11 +109,11 @@ class SimulaeCondition(SimulaeNode):
         if not isinstance(subject_value, str):
             raise ValueError(f"Subject value must be a string for string evaluation, got: {subject_value}")
         
-        if self.rule == SimulaeConditionRule.STRING_CONTAINS:
+        if self.rule == ConditionRule.STRING_CONTAINS:
             return (self.value in subject_value)
-        elif self.rule == SimulaeConditionRule.STRING_MATCHES:
+        elif self.rule == ConditionRule.STRING_MATCHES:
             return (subject_value == self.value)
-        elif self.rule == SimulaeConditionRule.REGEX_MATCHES:
+        elif self.rule == ConditionRule.REGEX_MATCHES:
             pattern = re.compile(str(self.value), re.IGNORECASE)
             return bool(pattern.match(subject_value))
         else:

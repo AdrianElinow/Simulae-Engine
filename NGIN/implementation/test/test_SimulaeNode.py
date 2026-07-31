@@ -3,7 +3,7 @@ import unittest
 
 from NGIN.utilities.lib.SimulaeConstants import MEMORY_CLASSIFICATIONS
 
-from .SimulaeNode import (
+from NGIN.implementation.lib.SimulaeNode import (
     ABILITIES,
     ADJACENT,
     ATTRIBUTES,
@@ -30,12 +30,14 @@ from .SimulaeNode import (
     STATUS,
     ATTACHMENTS,
     SimulaeNode,
-    generate_person_body,
-    generate_person_simulae_node,
-    generate_simulae_node,
     simulaenode_from_json,
 )
 
+from NGIN.implementation.lib.generators.simulae_node_generator_utils import (
+    generate_person_body,
+    generate_person_simulae_node,
+    generate_simulae_node,
+)
 
 simnode_module = importlib.import_module("NGIN.implementation.lib.SimulaeNode")
 

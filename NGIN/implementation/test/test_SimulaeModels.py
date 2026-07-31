@@ -1,7 +1,7 @@
 import unittest
 
 from NGIN.implementation.lib.Claim import Claim
-from NGIN.implementation.lib.SimulaeCondition import SimulaeCondition, SimulaeConditionRule
+from NGIN.implementation.lib.SimulaeCondition import SimulaeCondition, ConditionRule
 from NGIN.implementation.lib.SimulaeEvent import SimulaeEvent
 from NGIN.implementation.lib.SimulaeNodeStatus import SimulaeNodeStatus
 from NGIN.utilities.lib.SimulaeConstants import OBS, SRC, TGT
@@ -43,18 +43,18 @@ class TestSimulaeCondition(unittest.TestCase):
     def test_evaluates_nested_numeric_and_string_properties(self):
         subject = {"status": {"hunger": 4}, "name": "Ada"}
         self.condition.property = ["status", "hunger"]
-        self.condition.rule = SimulaeConditionRule.GREATER_THAN
+        self.condition.rule = ConditionRule.GREATER_THAN
         self.condition.value = 3
         self.assertTrue(self.condition.evaluate(subject))
 
         self.condition.property = ["name"]
-        self.condition.rule = SimulaeConditionRule.REGEX_MATCHES
+        self.condition.rule = ConditionRule.REGEX_MATCHES
         self.condition.value = "ada"
         self.assertTrue(self.condition.evaluate(subject))
 
     def test_evaluates_list_membership(self):
         self.condition.property = ["roles"]
-        self.condition.rule = SimulaeConditionRule.LIST_CONTAINS
+        self.condition.rule = ConditionRule.LIST_CONTAINS
         self.condition.value = "medic"
 
         self.assertTrue(self.condition.evaluate({"roles": ["scout", "medic"]}))
