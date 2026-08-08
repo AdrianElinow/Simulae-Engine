@@ -1,0 +1,13 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/nodetype_keyed_simulae_node_maps.json",
+    "type": "object",
+    "propertyNames": {
+        "$ref": "@simulae/nodetype.json"
+    },
+    "patternProperties": {
+        "^[A-Z]{3}$": {
+            "$ref": "@simulae/guid_keyed_simulae_node.json"
+        }
+    }
+}

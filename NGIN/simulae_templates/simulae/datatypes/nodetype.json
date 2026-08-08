@@ -1,0 +1,12 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/nodetype.json",
+    "type": "string",
+    "enum": [
+        "FAC",
+        "POI",
+        "LOC", 
+        "OBJ",
+        "EVT"
+    ]
+}
