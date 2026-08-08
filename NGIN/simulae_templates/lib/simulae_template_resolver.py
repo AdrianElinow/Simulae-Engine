@@ -7,6 +7,10 @@ references expanded inline.
 Recursive schemas cannot be fully inlined into finite JSON. When a cycle is
 detected, the resolver preserves that ``$ref`` without adding extension
 properties.
+
+By default the resolver also flattens JSON Schema composition keywords. The
+contents of ``allOf`` and single-item ``anyOf``/``oneOf`` lists are merged into
+the containing schema first, then the containing schema overwrites collisions.
 """
 
 from __future__ import annotations
@@ -35,6 +39,7 @@ except ImportError:
     )
 
 EXTENSION_PREFIX = "x" + "-"
+COMPOSITION_KEYS = ("allOf", "anyOf", "oneOf")
 
 
 class TemplateResolverError(Exception):
@@ -61,7 +66,13 @@ class SimulaeTemplateResolver:
         self.provider = provider or SimulaeTemplateProvider(template_root)
         self.template_root = self.provider.template_root
 
-    def resolve(self, ref: str, *, preserve_cycles: bool = True) -> dict[str, Any]:
+    def resolve(
+        self,
+        ref: str,
+        *,
+        preserve_cycles: bool = True,
+        flatten_compositions: bool = True,
+    ) -> dict[str, Any]:
         """Return a JSON-serializable schema with references expanded inline."""
 
         template = self._load_ref(ref)
@@ -70,6 +81,7 @@ class SimulaeTemplateResolver:
             current_file=template.path,
             ref_stack=(template.ref,),
             preserve_cycles=preserve_cycles,
+            flatten_compositions=flatten_compositions,
         )
 
     def print_index(self) -> None:
@@ -95,6 +107,7 @@ class SimulaeTemplateResolver:
         current_file: Path,
         ref_stack: tuple[str, ...],
         preserve_cycles: bool,
+        flatten_compositions: bool,
     ) -> Any:
         if isinstance(node, list):
             return [
@@ -103,6 +116,7 @@ class SimulaeTemplateResolver:
                     current_file=current_file,
                     ref_stack=ref_stack,
                     preserve_cycles=preserve_cycles,
+                    flatten_compositions=flatten_compositions,
                 )
                 for item in node
             ]
@@ -127,33 +141,98 @@ class SimulaeTemplateResolver:
                 current_file=template.path,
                 ref_stack=(*ref_stack, resolved_ref),
                 preserve_cycles=preserve_cycles,
+                flatten_compositions=flatten_compositions,
             )
 
             sibling_keys = {k: v for k, v in node.items() if k != "$ref"}
             if sibling_keys:
-                merged = copy.deepcopy(resolved_schema)
-                merged.update(
-                    self._resolve_node(
-                        sibling_keys,
-                        current_file=current_file,
-                        ref_stack=ref_stack,
-                        preserve_cycles=preserve_cycles,
-                    )
+                resolved_siblings = self._resolve_node(
+                    sibling_keys,
+                    current_file=current_file,
+                    ref_stack=ref_stack,
+                    preserve_cycles=preserve_cycles,
+                    flatten_compositions=flatten_compositions,
                 )
-                return merged
+                return self._deep_merge(resolved_schema, resolved_siblings)
 
             return resolved_schema
 
-        return {
+        resolved_node = {
             key: self._resolve_node(
                 value,
                 current_file=current_file,
                 ref_stack=ref_stack,
                 preserve_cycles=preserve_cycles,
+                flatten_compositions=flatten_compositions,
             )
             for key, value in node.items()
             if not key.startswith(EXTENSION_PREFIX)
         }
+
+        if flatten_compositions:
+            return self._flatten_compositions(resolved_node)
+
+        return resolved_node
+
+    def _flatten_compositions(self, node: dict[str, Any]) -> dict[str, Any]:
+        """Inline supported composition schemas, with the containing schema winning."""
+
+        composed: dict[str, Any] = {}
+        flattened_keys: set[str] = set()
+
+        for key in COMPOSITION_KEYS:
+            schemas = node.get(key)
+            if not self._can_flatten_composition(key, schemas):
+                continue
+
+            for schema in schemas:
+                composed = self._deep_merge(composed, schema)
+            flattened_keys.add(key)
+
+        if not flattened_keys:
+            return node
+
+        referencing_schema = {
+            key: value for key, value in node.items() if key not in flattened_keys
+        }
+        return self._deep_merge(composed, referencing_schema)
+
+    def _can_flatten_composition(self, key: str, schemas: Any) -> bool:
+        if not isinstance(schemas, list):
+            return False
+
+        if key == "allOf":
+            return all(isinstance(schema, dict) for schema in schemas)
+
+        if key in {"anyOf", "oneOf"}:
+            return len(schemas) == 1 and isinstance(schemas[0], dict)
+
+        return False
+
+    def _deep_merge(self, base: Any, overlay: Any) -> Any:
+        if not isinstance(base, dict) or not isinstance(overlay, dict):
+            return copy.deepcopy(overlay)
+
+        merged = copy.deepcopy(base)
+        for key, value in overlay.items():
+            if key == "properties" and isinstance(merged.get(key), dict) and isinstance(value, dict):
+                merged[key] = self._merge_properties(merged[key], value)
+            elif key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
+                merged[key] = self._deep_merge(merged[key], value)
+            else:
+                merged[key] = copy.deepcopy(value)
+
+        return merged
+
+    def _merge_properties(
+        self,
+        base_properties: dict[str, Any],
+        overlay_properties: dict[str, Any],
+    ) -> dict[str, Any]:
+        merged = copy.deepcopy(base_properties)
+        for property_name, property_schema in overlay_properties.items():
+            merged[property_name] = copy.deepcopy(property_schema)
+        return merged
 
     def _resolve_ref_value(self, ref: str, current_file: Path) -> str:
         base_ref = ref.split("#", 1)[0]
@@ -174,10 +253,18 @@ class SimulaeTemplateResolver:
         return ref.split("#", 1)[0]
 
 
-def resolve_template(ref: str, template_root: str | Path | None = None) -> dict[str, Any]:
+def resolve_template(
+    ref: str,
+    template_root: str | Path | None = None,
+    *,
+    flatten_compositions: bool = True,
+) -> dict[str, Any]:
     """Convenience function for callers that just need a resolved schema."""
 
-    return SimulaeTemplateResolver(template_root).resolve(ref)
+    return SimulaeTemplateResolver(template_root).resolve(
+        ref,
+        flatten_compositions=flatten_compositions,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -204,6 +291,25 @@ def main(argv: list[str] | None = None) -> int:
         help="Raise an error on cyclic refs instead of preserving the cycle ref.",
     )
     parser.add_argument(
+        "--flatten-compositions",
+        dest="flatten_compositions",
+        action="store_true",
+        help=(
+            "Flatten allOf and single-item anyOf/oneOf into the referencing "
+            "schema. This is the default."
+        ),
+    )
+    parser.add_argument(
+        "--no-flatten-compositions",
+        dest="flatten_compositions",
+        action="store_false",
+        help=(
+            "Keep JSON Schema composition keywords instead of flattening allOf "
+            "and single-item anyOf/oneOf into the referencing schema."
+        ),
+    )
+    parser.set_defaults(flatten_compositions=True)
+    parser.add_argument(
         "--index",
         action="store_true",
         help="Print the discovered template ref index and exit.",
@@ -216,7 +322,11 @@ def main(argv: list[str] | None = None) -> int:
         resolver.print_index()
         return 0
 
-    resolved = resolver.resolve(args.ref, preserve_cycles=not args.strict_cycles)
+    resolved = resolver.resolve(
+        args.ref,
+        preserve_cycles=not args.strict_cycles,
+        flatten_compositions=args.flatten_compositions,
+    )
     rendered = json.dumps(resolved, indent=4, sort_keys=False)
 
     if args.output:

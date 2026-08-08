@@ -81,6 +81,110 @@ import sys
 with open(sys.argv[1], "r", encoding="utf-8") as resolved_file:
     resolved = json.load(resolved_file)
 
+errors = []
+schema_map_keys = (
+    "$defs",
+    "definitions",
+    "properties",
+    "patternProperties",
+    "dependentSchemas",
+)
+schema_value_keys = (
+    "additionalProperties",
+    "contains",
+    "else",
+    "if",
+    "items",
+    "not",
+    "propertyNames",
+    "then",
+    "unevaluatedItems",
+    "unevaluatedProperties",
+)
+schema_array_keys = (
+    "allOf",
+    "anyOf",
+    "oneOf",
+    "prefixItems",
+)
+
+def is_schema(value):
+    return isinstance(value, (dict, bool))
+
+def check_schema(value, path="$"):
+    if isinstance(value, bool):
+        return
+
+    if not isinstance(value, dict):
+        errors.append(f"{path}: schema must be an object or boolean")
+        return
+
+    schema_type = value.get("type")
+    if schema_type is not None:
+        valid_type = isinstance(schema_type, str) or (
+            isinstance(schema_type, list)
+            and all(isinstance(item, str) for item in schema_type)
+        )
+        if not valid_type:
+            errors.append(f"{path}.type: must be a string or list of strings")
+
+    required = value.get("required")
+    if required is not None and not (
+        isinstance(required, list) and all(isinstance(item, str) for item in required)
+    ):
+        errors.append(f"{path}.required: must be a list of strings")
+
+    for key in schema_map_keys:
+        child_map = value.get(key)
+        if child_map is None:
+            continue
+        if not isinstance(child_map, dict):
+            errors.append(f"{path}.{key}: must be an object")
+            continue
+        for child_key, child_schema in child_map.items():
+            if not is_schema(child_schema):
+                errors.append(f"{path}.{key}.{child_key}: must be a schema")
+                continue
+            check_schema(child_schema, f"{path}.{key}.{child_key}")
+
+    for key in schema_value_keys:
+        child_schema = value.get(key)
+        if child_schema is None:
+            continue
+        if not is_schema(child_schema):
+            errors.append(f"{path}.{key}: must be a schema")
+            continue
+        check_schema(child_schema, f"{path}.{key}")
+
+    for key in schema_array_keys:
+        child_schemas = value.get(key)
+        if child_schemas is None:
+            continue
+        if not isinstance(child_schemas, list):
+            errors.append(f"{path}.{key}: must be a list")
+            continue
+        for index, child_schema in enumerate(child_schemas):
+            if not is_schema(child_schema):
+                errors.append(f"{path}.{key}[{index}]: must be a schema")
+                continue
+            check_schema(child_schema, f"{path}.{key}[{index}]")
+
+check_schema(resolved)
+
+if errors:
+    print("resolved output is not schema-shaped:", file=sys.stderr)
+    for error in errors[:40]:
+        print(f"  {error}", file=sys.stderr)
+    raise SystemExit(1)
+' "$output"
+
+"$python_command" -c '
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as resolved_file:
+    resolved = json.load(resolved_file)
+
 refs = 0
 extension_prefix = "x" + "-"
 extension_properties = []
