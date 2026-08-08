@@ -1,0 +1,43 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/OBJ/Human/ears.json",
+    "title": "Human Ear",
+    "allOf": [
+        {
+            "$ref": "@simulae/simulae_node.json"
+        }
+    ],
+    "properties": {
+        "nodetype": {
+            "const": "Object"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "const": "Ear"
+                },
+                "species": {
+                    "const": "Human"
+                },
+                "organ_systems": {
+                    "type": "array",
+                    "const": [
+                        "Sensory"
+                    ],
+                    "items": {
+                        "type": "string",
+                        "$ref": "@simulae/datatypes/mammalian_organ_systems.json"
+                    }
+                },
+                "orientation": {
+                    "type": "string",
+                    "enum": [
+                        "Left",
+                        "Right"
+                    ]
+                }
+            }
+        }
+    }
+}

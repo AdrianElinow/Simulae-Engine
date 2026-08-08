@@ -1,0 +1,84 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/OBJ/Human/torso.json",
+    "title": "Human Torso",
+    "allOf": [
+        {
+            "$ref": "@simulae/simulae_node.json"
+        }
+    ],
+    "properties": {
+        "nodetype": {
+            "const": "Object"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "const": "Torso"
+                }
+            }
+        },
+        "attributes": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "unit": "meters",
+                    "x-generation": {
+                        "type": "derived_ratio",
+                        "source": "body_height",
+                        "ratio": {
+                            "distribution": "constant",
+                            "value": 0.35,
+                            "min": 0.35,
+                            "max": 0.35,
+                            "average": 0.35,
+                            "stddev": 0
+                        }
+                    }
+                },
+                "weight": {
+                    "type": "number",
+                    "unit": "kilograms",
+                    "x-generation": {
+                        "type": "derived_ratio",
+                        "source": "body_weight",
+                        "ratio": {
+                            "distribution": "constant",
+                            "value": 0.35,
+                            "min": 0.35,
+                            "max": 0.35,
+                            "average": 0.35,
+                            "stddev": 0
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "relations": {
+        "contents": {
+            "object": {
+                "heart": {
+                    "$ref": "@simulae/Human/heart.json"
+                },
+                "lungs": {
+                    "$ref": "@simulae/Human/lungs.json"
+                },
+                "liver": {
+                    "$ref": "@simulae/Human/liver.json"
+                },
+                "kidneys": {
+                    "$ref": "@simulae/Human/kidneys.json"
+                },
+                "stomach": {
+                    "$ref": "@simulae/Human/stomach.json"
+                },
+                "intestines": {
+                    "$ref": "@simulae/Human/intestines.json"
+                }
+            }
+        }
+    }
+}

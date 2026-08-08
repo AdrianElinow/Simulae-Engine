@@ -3,12 +3,19 @@
     "$id": "@simulae/human.json",
     "allOf": [
         {
-            "$ref": "@simulae/simulae_node.json"
+            "$ref": "@simulae/Human/human_body.json"
         }
     ],
     "properties": {
         "nodetype": {
-            "const": "POI"
+            "const": "Person"
+        },
+        "relations": {
+            "components": {
+                "body": {
+                    "$ref": "@simulae/Human/human_body.json"
+                }
+            }
         }
     }
 }

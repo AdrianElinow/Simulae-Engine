@@ -1,0 +1,96 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/OBJ/Human/eyes.json",
+    "title": "Human Eyes",
+    "allOf": [
+        {
+            "$ref": "@simulae/simulae_node.json"
+        }
+    ],
+    "properties": {
+        "nodetype": {
+            "const": "Object"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "const": "Eyes"
+                },
+                "species": {
+                    "const": "Human"
+                },
+                "organ_systems": {
+                    "type": "array",
+                    "const": [
+                        "Sensory"
+                    ],
+                    "items": {
+                        "type": "string",
+                        "$ref": "@simulae/datatypes/mammalian_organ_systems.json"
+                    }
+                },
+                "orientation": {
+                    "type": "string",
+                    "enum": [
+                        "Left",
+                        "Right"
+                    ]
+                },
+                "color": {
+                    "schelera": {
+                        "allOf": [
+                            {
+                                "$ref": "@simulae/datatypes/color.json"
+                            }
+                        ],
+                        "x-generation": {
+                            "type": "categorical",
+                            "weights": {
+                                "#FFFFFF": 0.8,
+                                "#F0F0F0": 0.1,
+                                "#E0E0E0": 0.05,
+                                "#D0D0D0": 0.05
+                            }
+                        }
+                    },
+                    "iris": {
+                        "allOf": [
+                            {
+                                "$ref": "@simulae/datatypes/color.json"
+                            }
+                        ],
+                        "x-generation": {
+                            "type": "categorical",
+                            "weights": {
+                                "#000000": 0.1,
+                                "#0000FF": 0.1,
+                                "#00FF00": 0.1,
+                                "#A52A2A": 0.1,
+                                "#808080": 0.1,
+                                "#00FFFF": 0.1,
+                                "#FFA500": 0.1,
+                                "#800080": 0.1,
+                                "#FFFFFF": 0.1,
+                                "#FFFF00": 0.1 
+                            }
+                        }
+                    },
+                    "pupil": {
+                        "allOf": [
+                            {
+                                "$ref": "@simulae/datatypes/color.json"
+                            }
+                        ],
+                        "x-generation": {
+                            "type": "categorical",
+                            "weights": {
+                                "#000000": 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

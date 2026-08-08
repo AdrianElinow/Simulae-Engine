@@ -1,0 +1,64 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/OBJ/Human/hair.json",
+    "title": "Human Hair",
+    "allOf": [
+        {
+            "$ref": "@simulae/simulae_node.json"
+        }
+    ],
+    "properties": {
+        "nodetype": {
+            "const": "Object"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "const": "Eyes"
+                },
+                "species": {
+                    "const": "Human"
+                },
+                "organ_systems": {
+                    "type": "array",
+                    "const": [
+                        "Integumentary"
+                    ],
+                    "items": {
+                        "type": "string",
+                        "$ref": "@simulae/datatypes/mammalian_organ_systems.json"
+                    }
+                },
+                "orientation": {
+                    "type": "string",
+                    "enum": [
+                        "Left",
+                        "Right"
+                    ]
+                },
+                "color": {
+                    "primary": {
+                        "allOf": [
+                            {
+                                "$ref": "@simulae/datatypes/color.json"
+                            }
+                        ],
+                        "x-generation": {
+                            "type": "categorical",
+                            "weights": {
+                                "#000000": 0.4,
+                                "#A52A2A": 0.2,
+                                "#FFD700": 0.1,
+                                "#FFFFFF": 0.1,
+                                "#808080": 0.1,
+                                "#FF4500": 0.05,
+                                "#8B4513": 0.05
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

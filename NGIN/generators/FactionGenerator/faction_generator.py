@@ -3,7 +3,7 @@
 import sys, random, json
 from pprint import pprint
 
-from NGIN.NGIN_config import madlibs
+from NGIN.config import madlibs
 
 def generate_policy():
     ''' Selects one of each option for each policy 'scale'

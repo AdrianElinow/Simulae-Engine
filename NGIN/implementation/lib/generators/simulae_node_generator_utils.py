@@ -1,7 +1,7 @@
 
 import random
 
-from NGIN.NGIN_config.madlibs import HUMAN_BODY_METRICS
+from NGIN.config.madlibs import HUMAN_BODY_METRICS
 from NGIN.utilities.lib.social_scale_utils import random_bell_curve_value
 from NGIN.utilities.lib.ngin_console_log import MAX_ADJACENT_LOCATIONS, logAll
 from NGIN.implementation.lib.SimulaeNode import SimulaeNode

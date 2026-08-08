@@ -1,0 +1,70 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/OBJ/Human/left_leg.json",
+    "title": "Human Left Leg",
+    "allOf": [
+        {
+            "$ref": "@simulae/simulae_node.json"
+        }
+    ],
+    "properties": {
+        "nodetype": {
+            "const": "Object"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "const": "Left Leg"
+                },
+                "species": {
+                    "const": "Human"
+                },
+                "orientation": {
+                    "type": "string",
+                    "enum": [
+                        "Left",
+                        "Right"
+                    ]
+                }
+            }
+        },
+        "attributes": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "unit": "meters",
+                    "x-generation": {
+                        "type": "derived_ratio",
+                        "source": "body_height",
+                        "ratio": {
+                            "distribution": "constant",
+                            "value": 0.45,
+                            "min": 0.45,
+                            "max": 0.45,
+                            "average": 0.45,
+                            "stddev": 0
+                        }
+                    }
+                },
+                "weight": {
+                    "type": "number",
+                    "unit": "kilograms",
+                    "x-generation": {
+                        "type": "derived_ratio",
+                        "source": "body_weight",
+                        "ratio": {
+                            "distribution": "constant",
+                            "value": 0.45,
+                            "min": 0.45,
+                            "max": 0.45,
+                            "average": 0.45,
+                            "stddev": 0
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

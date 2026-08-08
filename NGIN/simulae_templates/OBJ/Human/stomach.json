@@ -1,0 +1,36 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/OBJ/Human/stomach.json",
+    "title": "Human Stomach",
+    "allOf": [
+        {
+            "$ref": "@simulae/simulae_node.json"
+        }
+    ],
+    "properties": {
+        "nodetype": {
+            "const": "Object"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "const": "Stomach"
+                },
+                "ComponentClass": {
+                    "const": "Organ"
+                },
+                "organ_systems": {
+                    "type": "array",
+                    "const": [
+                        "Digestive"
+                    ],
+                    "items": {
+                        "type": "string",
+                        "$ref": "@simulae/datatypes/mammalian_organ_systems.json"
+                    }
+                }
+            }
+        }
+    }
+}
