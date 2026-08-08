@@ -8,6 +8,8 @@
         "Location", 
         "Object",
         "Event",
-        "Condition"
+        "Condition",
+        "Effect",
+        "Action"
     ]
 }

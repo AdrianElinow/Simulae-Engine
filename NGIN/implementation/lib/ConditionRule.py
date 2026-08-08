@@ -27,3 +27,20 @@ STRING_RULES = [ConditionRuleType.STRING_CONTAINS,
                 ConditionRuleType.REGEX_MATCHES]
 LIST_RULES = [ConditionRuleType.LIST_CONTAINS,
               ConditionRuleType.NOT_LIST_CONTAINS]
+
+CONDITION_RULE_ALIASES = {
+    "exists": ConditionRuleType.EXISTS,
+    "not-exists": ConditionRuleType.NOT_EXISTS,
+    "equal": ConditionRuleType.EQUALS,
+    "==": ConditionRuleType.EQUALS,
+    "not-equal": ConditionRuleType.NOT_EQUALS,
+    "!=": ConditionRuleType.NOT_EQUALS,
+    "<": ConditionRuleType.LESS_THAN,
+    "<=": ConditionRuleType.LESS_THAN_OR_EQUAL,
+    ">": ConditionRuleType.GREATER_THAN,
+    ">=": ConditionRuleType.GREATER_THAN_OR_EQUAL,
+    "contains": ConditionRuleType.LIST_CONTAINS,
+    "not-contains": ConditionRuleType.NOT_LIST_CONTAINS,
+    "in": ConditionRuleType.LIST_CONTAINS,
+    "not-in": ConditionRuleType.NOT_LIST_CONTAINS,
+}

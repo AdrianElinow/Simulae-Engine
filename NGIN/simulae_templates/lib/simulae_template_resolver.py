@@ -126,6 +126,20 @@ class SimulaeTemplateResolver:
 
         ref = node.get("$ref")
         if isinstance(ref, str):
+            if ref.startswith("#"):
+                sibling_keys = {k: v for k, v in node.items() if k != "$ref"}
+                resolved_ref_node = {"$ref": ref}
+                if sibling_keys:
+                    resolved_siblings = self._resolve_node(
+                        sibling_keys,
+                        current_file=current_file,
+                        ref_stack=ref_stack,
+                        preserve_cycles=preserve_cycles,
+                        flatten_compositions=flatten_compositions,
+                    )
+                    return self._deep_merge(resolved_ref_node, resolved_siblings)
+                return resolved_ref_node
+
             resolved_ref = self._resolve_ref_value(ref, current_file)
 
             if resolved_ref in ref_stack:

@@ -30,53 +30,53 @@ class SimulaeActor(SimulaeNode):
 
         self.Attributes[STATUS_THRESHOLDS] = {
             THREAT: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             HUNGER: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             THIRST: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             EXHAUSTION: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             SICK: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             TEMPERATURE: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 50,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             LONELINESS: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             }
         }
 
@@ -801,7 +801,7 @@ class SimulaeActor(SimulaeNode):
     
     def is_overheated(self):
         temp = self.get_attribute(TEMPERATURE)
-        temp_threshold = self.get_status_threshold(TEMPERATURE, MAXIMUM)
+        temp_threshold = self.get_status_threshold(TEMPERATURE, MAX)
         if temp and temp_threshold and temp >= temp_threshold:
             return True
         return False
@@ -815,7 +815,7 @@ class SimulaeActor(SimulaeNode):
 
     def is_freezing(self):
         temp = self.get_attribute(TEMPERATURE)
-        temp_threshold = self.get_status_threshold(TEMPERATURE, MINIMUM)
+        temp_threshold = self.get_status_threshold(TEMPERATURE, MIN)
         if temp and temp_threshold and temp <= temp_threshold:
             return True
         return False
