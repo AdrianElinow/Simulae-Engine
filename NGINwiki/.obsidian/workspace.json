@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Gamemodes/Narratives/Faction/Faction Questlines.md",
+                "file": "SimulaeNode/Simulae Effect.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Faction Questlines"
+              "title": "Simulae Effect"
             }
           }
         ]
@@ -185,6 +185,8 @@
   },
   "active": "9a6c07c212eb524b",
   "lastOpenFiles": [
+    "SimulaeNode/Structure/Abilities.md",
+    "Gamemodes/Narratives/Faction/Faction Questlines.md",
     "Gamemodes/Narratives/Plot Catalogue.md",
     "Gamemodes/Narratives/Faction/Faction Types.md",
     "Gamemodes/Narratives/Narratives.md",
@@ -193,7 +195,6 @@
     "Gamemodes/Narratives/Social/Assassination Plots.md",
     "Gamemodes/Narratives/Social/Intrigue.md",
     "Gamemodes/Narratives/Social/Romance.md",
-    "Gamemodes/Narratives/Faction/Faction Questlines.md",
     "Gamemodes/Narratives/Faction/JoinFaction.md",
     "Gamemodes/Narratives/Social/Romance",
     "Gamemodes/Narratives/Faction/BecomeFactionLeader.md",
@@ -220,7 +221,6 @@
     "Immersive Sim/Hitman World of Assassination/Systems.md",
     "Immersive Sim/Hitman World of Assassination/Factions.md",
     "Immersive Sim/Hitman World of Assassination/roles/Civilian/Civilian.md",
-    "Immersive Sim/Hitman World of Assassination/roles/Target/Mission Target.md",
     "Pasted image 20260418192310.png",
     "Pasted image 20260418192057.png",
     "NGINwiki/images/political-scales-diagram.png",

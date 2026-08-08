@@ -6,6 +6,7 @@ OBJ = 'Object' # Object
 
 EVT = 'Event' # Event
 CND = 'Condition' # Conditional
+EFX = 'Effect' # Effect
 
 SRC = "Source" # source
 TGT = "Target" # target
@@ -37,7 +38,7 @@ SOCIAL_NODE_TYPES = [FAC,POI,PTY]
 GROUP_NODE_TYPES = [FAC,PTY]
 PEOPLE_NODE_TYPES = [POI,PTY]
 INANIMATE_NODE_TYPES = [LOC,OBJ]
-META_NODE_TYPES = [EVT, CND]
+META_NODE_TYPES = [EVT, CND, EFX]
 
 RELATIONS = "Relations"
 CONTENTS = "Contents"

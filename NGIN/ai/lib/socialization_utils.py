@@ -1,7 +1,7 @@
 from collections import deque
 from copy import deepcopy
 from enum import Enum
-from NGIN.ai.lib.ngin_action import Action
+from NGIN.ai.lib.ngin_action import SimulaeAction
 
 from NGIN.ai.lib.socialization_constants import SOCIAL_INTERACTION_ALIASES, SOCIAL_INTERACTION_TYPES
 from NGIN.implementation.lib.SimulaeNode import *
@@ -312,21 +312,21 @@ def get_heuristic(actions, actor: SimulaeNode | None = None, target: SimulaeNode
 
         act, step_target = normalized
 
-        if act == Action.GOTO:
+        if act == SimulaeAction.GOTO:
             if actor and step_target:
                 logAll('getting distance from ',actor,'to',step_target)
             value += distance_between(actor, step_target)
-        elif act == Action.TAKE:
+        elif act == SimulaeAction.TAKE:
             value += 1
-        elif act == Action.USE:
+        elif act == SimulaeAction.USE:
             value += 1
-        elif act == Action.MAKE:
+        elif act == SimulaeAction.MAKE:
             value += 2
-        elif act == Action.SEARCH:
+        elif act == SimulaeAction.SEARCH:
             value += 2
-        elif act == Action.INTERACT:
+        elif act == SimulaeAction.INTERACT:
             value += 1
-        elif act == Action.ACQUIRE:
+        elif act == SimulaeAction.ACQUIRE:
             value += 2
         else:
             value += 3
