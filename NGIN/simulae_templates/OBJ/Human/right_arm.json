@@ -31,7 +31,7 @@
                 "height": {
                     "type": "number",
                     "unit": "meters",
-                    "x-generation": {
+                    "generation": {
                         "type": "derived_ratio",
                         "source": "body_height",
                         "ratio": {
@@ -47,7 +47,7 @@
                 "weight": {
                     "type": "number",
                     "unit": "kilograms",
-                    "x-generation": {
+                    "generation": {
                         "type": "derived_ratio",
                         "source": "body_weight",
                         "ratio": {
@@ -63,7 +63,7 @@
             }
         }
     },
-    "x-relations": {
+    "relations": {
         "Components": {
             "Object": [
                 "Right Hand"

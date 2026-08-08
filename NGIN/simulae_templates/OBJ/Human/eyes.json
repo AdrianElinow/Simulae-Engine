@@ -44,7 +44,7 @@
                                 "$ref": "@simulae/datatypes/color.json"
                             }
                         ],
-                        "x-generation": {
+                        "generation": {
                             "type": "categorical",
                             "weights": {
                                 "#FFFFFF": 0.8,
@@ -60,7 +60,7 @@
                                 "$ref": "@simulae/datatypes/color.json"
                             }
                         ],
-                        "x-generation": {
+                        "generation": {
                             "type": "categorical",
                             "weights": {
                                 "#000000": 0.1,
@@ -82,7 +82,7 @@
                                 "$ref": "@simulae/datatypes/color.json"
                             }
                         ],
-                        "x-generation": {
+                        "generation": {
                             "type": "categorical",
                             "weights": {
                                 "#000000": 1

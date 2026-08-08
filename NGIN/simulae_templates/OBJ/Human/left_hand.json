@@ -35,7 +35,7 @@
                 "weight": {
                     "type": "number",
                     "unit": "kilograms",
-                    "x-generation": {
+                    "generation": {
                         "type": "derived_ratio",
                         "source": "body_weight",
                         "ratio": {

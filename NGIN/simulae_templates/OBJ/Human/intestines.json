@@ -29,7 +29,7 @@
                         "type": "string",
                         "$ref": "@simulae/datatypes/mammalian_organ_systems.json"
                     }
-                },
+                }
             }
         }
     }
