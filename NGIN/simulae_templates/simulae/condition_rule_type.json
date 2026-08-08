@@ -1,0 +1,22 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/condition_rule_type.json",
+    "type": "string",
+    "enum": [
+        "EXISTS",
+        "NOT_EXISTS",
+        "EQUALS",
+        "NOT_EQUALS",
+        "LESS_THAN",
+        "LESS_THAN_OR_EQUAL",
+        "GREATER_THAN",
+        "GREATER_THAN_OR_EQUAL",
+        "WITHIN_RANGE",
+        "BEYOND_RANGE",
+        "STRING_CONTAINS",
+        "STRING_MATCHES",
+        "REGEX_MATCHES",
+        "LIST_CONTAINS",
+        "NOT_LIST_CONTAINS"
+    ]
+}

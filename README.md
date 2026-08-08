@@ -17,54 +17,102 @@ All this with the intended goal of being able to use compounding emergent behavi
 
 > Any setting, any genre, any story, which you can either watch or actively participate in or shape.
 
-Think of similar engines (in the context of interactive media) such as Dwarf Fortress, Rimworld, etc. but with:
-- NPC's with individual personalities (and political opinions) that can be changed over time or by 'experienced' events and determine their behavior
+The intention is a Dynamic-Narrative Immersive Sim engine, capable of functioning as an amalgamation and evolution of some existing games such as:
+- Dwarf Fortress
+- Rimworld
+- Ultima
+- The Elder Scrolls & Fallout
+- Deus Ex
+- Dishonored
+- Far Cry
+- Aneurism IV
+- Social Deduction games (ex: Blood on the Clocktower, Mafia/Werewolf, Trouble in Terrorist Town)
+- The Witcher
+- STALKER
+- Darkest Dungeon
+- Shadows of Doubt
+- Hitman
+- Beta Decay (Rumored)
+
+Features:
 - Player-driven narratives.
-    - Fulfill any role. Adventurer, Mercenary, Merchant, Diplomat, Inventor, Leader, or just a Farmer
-    - Build their own faction, swaying other NPC's to your favor, and commanding others.
+    - Fulfill any role: Adventurer, Mercenary, Merchant, Diplomat, Inventor, Leader, Farmer, Mage, Assassin, Warlord, Mastermind, or agent of chaos
+    - Join existing factions, rise and fall, or build their own faction, swaying other NPC's to your favor, and commanding others.
+- Advanced NPCs
+    - Individual personalities, quirks, goals, and political opinions that can be changed over time or by 'experienced' events and determine their behavior
+    - Intelligent actions and decision-making logic
     - (Re)active actors. Some may betray you, some may become a rival, some may fall in love, others may be won over by your efforts.
 - Dynamic narrative generation
-    - Join a faction, become a leader, start a war, win the war, become King
-    - Start a cult or criminal empire and grow your power and influence.
+    - Join a faction and rise to become a leader, start a war, win or lose, rule the world or die trying.
+    - Start a cult or criminal empire and grow your power and influence, competing against rival organizations
+    - Faction wars rage in the background, while NPCs live out their daily lives
 
-## Project Status (Last Verified: February 17, 2026)
+## Project Status (Last Verified: July 31, 2026)
 
-### Core Data Model
-- [x] `SimulaeNode` entity model (references, attributes, relations, checks, scales, memory list)
-- [x] Personality and policy scale generation for social nodes
-- [x] Serialization helpers (`toJSON`, `simulaenode_from_json`) and node factory helpers
+### Current Priorities
+
+- NPC Planning, Decision Making, Memory, and basic socialization
+    - [ ] Implement structured social memory events
+    - [ ] Implement appraisal model for social interactions
+    - [ ] Connect memory/claims/social-model updates to response selection
+    - [ ] String prompts-to-responses pipelines together between multiple NPCs
+- Basic Narratives
+    - [ ] 
+- Reimplement world generation
+    - [ ] Generate a 'developed' world with history, cultures, factions, etc (generate initial state and let the world cook for many cycles)
+        - [ ] variable engine simulation 'resolution'
+
+### Project Goal Checklist Structure
+
+- [ ] Core Data Model(s)
+    - [x] `SimulaeNode` entity model (references, attributes, relations, checks, scales, memory list)
+        - [x] Personality and policy scale generation for social nodes
+        - [ ] Memory structure(s)
+    - Information Models
+        - [ ] 
+    - Engine Models
+        - [ ] `SimulaeEvent` model
+        - [ ] `SimulaeTemplate` model 
+    - NPC Implementation
+        - [ ] `NGIN_Simulae_Actor` planning/prioritization scaffolding in `NGIN/NGIN_AI.py`
+        - NPC AI
+            - Goal Breakdown
+                - [ ] Implementation
+            - Decision Making
+                - [ ] Prioritization
+                - [ ] Goal/Task Heuristic(s)
+                    - [ ] Basic status & need prioritization
+                    - [ ] Goal prioritization
+            - Socialization
+                - [ ] Appraisals (interpretation of stimuli events)
+                - [ ] Experiences (appraisals -> memories)
+                - [ ] Responses (reactions to experiences based on memories, personality, opinions)
+                    - [ ] Goal/Task (re)planning responses
+                    - [ ] Socialization responses
+                - [ ] Information relaying
+                    - [ ] Conclusions & Deduction
+- [ ] API
+    - [ ] Setup
+        - [ ] Flask API endpoint for campaign generation (`NGIN/api.py`)
+        - [x] API run scripts (`run_api.ps1`, `run_api.sh`)
+    - [ ] Database models
+    - [ ] Core Data Models CRUD
+    - [ ] Resolution handler
+        - [ ] Resolution Queue API
+- Visual Integration
+    - [ ] Full UI/UX integration with complete gameplay loop
+        - [x] Frontend client scaffold (`NGINClient/`, Vue + Vite)
+
+- Utilities
+    - [x] Serialization helpers (`toJSON`, `simulaenode_from_json`) and node factory helpers
 - [x] Unit test coverage for current `SimulaeNode` behavior
 - [ ] Relation search/filtering is fully implemented (`get_relations_by_criteria` is still a TODO placeholder)
 
-### World / Campaign Generation
-- [x] `NGIN/SimulaeCampaignGenerator.py` main generator and console loop
-- [x] Basic world/location/entity generation flow
-- [x] Action selection and action-resolution scaffolding
-- [ ] Mission outcomes are fully integrated into long-term world state
-- [ ] Actor/non-actor behavior depth is complete (multiple TODOs remain)
+### Design & Documentation Goals
 
-### AI / Socialization
-- [x] `NGIN_Simulae_Actor` planning/prioritization scaffolding in `NGIN/NGIN_AI.py`
-- [x] Basic status-need checks (hunger/thirst/exhaustion/etc.)
-- [x] Task planning and execution loop for survival needs and simple acquisition
-- [ ] Encounter appraisal pipeline (`appraise_event`, `appraise_encounter`) implementation
-- [ ] Social interaction appraisal/response ranking implementation
-
-### Memory / Claims
-- [x] Claim model skeleton exists (`NGIN/Claim.py`)
-- [ ] Episodic memory event structure implementation (`NGIN/MemoryEvent.py` is currently empty)
-- [ ] Socialization module implementation (`NGIN/NGIN_Socialization.py` is currently empty)
-- [ ] Memory -> claim extraction -> social model update pipeline
-
-### API / Client
-- [x] Flask API endpoint for campaign generation (`NGIN/api.py`)
-- [x] API run scripts (`run_api.ps1`, `run_api.sh`)
-- [x] Frontend client scaffold (`NGINClient/`, Vue + Vite)
-- [ ] Full UI/UX integration with complete gameplay loop
-
-### Testing
-- [x] Test suite currently runs and passes via `python -B -m unittest -v`
-- [ ] Some tests are placeholder stubs with early `return` (notably in `NGIN/test_NGIN_AI.py`)
+- [ ] NPC AI Design
+    - [ ] 
+- [ ] Narratives & Implementation Designs
 
 ## System Diagrams
 
@@ -169,19 +217,19 @@ pip install -r requirements.txt
 PowerShell:
 
 ```powershell
-./run_api.ps1
+./scripts/run_api.ps1
 ```
 
 Bash:
 
 ```bash
-./run_api.sh
+./scripts/run_api.sh
 ```
 
 ### Run Web Client (PowerShell)
 
 ```powershell
-./start_nginclient.ps1
+./scripts/start_nginclient.ps1
 ```
 
 ### Run Terminal Campaign Generator (PowerShell)
@@ -215,11 +263,3 @@ or:
 ```bash
 python -B -m unittest -v
 ```
-
-## Current Priorities
-
-- [ ] Implement structured social memory events
-- [ ] Implement appraisal model for social interactions
-- [ ] Connect memory/claims/social-model updates to response selection
-- [ ] Finish mission outcome/state propagation
-- [ ] Replace placeholder AI/socialization tests with full assertions

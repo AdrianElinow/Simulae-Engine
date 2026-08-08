@@ -1,0 +1,64 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/simulae_node.json",
+    "type": "object",
+    "properties": {
+        "id": {
+            "$ref": "@simulae/guid.json"
+        },
+        "nodetype": {
+            "$ref": "@simulae/nodetype.json"
+        },
+        "references": {
+            "type": "object",
+            "patternProperties": {
+                "^.*$": {
+                    "type": "string"
+                }
+            }
+        },
+        "relations": {
+            "$ref": "@simulae/nodetype_keyed_simulae_node_maps.json"
+        },
+        "scales": {
+            "type": "object"
+        },
+        "attributes": {
+            "type": "object",
+            "patternProperties": {
+                "^.*$": {
+                    "type": "number"
+                }
+            }
+        },
+        "checks": {
+            "type": "object",
+            "patternProperties": {
+                "^.*$": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "abilities": {
+            "type": "object"
+        },
+        "memory": {
+            "type": "object",
+            "$ref": "@simulae/nodetype_keyed_simulae_node_maps.json",
+            "additionalProperties": {
+                "type": "object",
+                "propertyNames": {
+                    "enum": [
+                        "claims",
+                        "threads"
+                    ]
+                },
+                "patternProperties": {
+                    "^.*$": {
+                        "$ref": "@simulae/guid_keyed_simulae_node.json"
+                    }
+                }
+            }
+        }
+    }
+}
