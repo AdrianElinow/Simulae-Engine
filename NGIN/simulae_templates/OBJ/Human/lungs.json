@@ -1,0 +1,33 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/OBJ/Human/lungs.json",
+    "title": "Human Lungs",
+    "allOf": [
+        {
+            "$ref": "@simulae/simulae_node.json"
+        }
+    ],
+    "properties": {
+        "nodetype": {
+            "const": "Object"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "const": "Lungs"
+                },
+                "organ_systems": {
+                    "type": "array",
+                    "const": [
+                        "Respiratory"
+                    ],
+                    "items": {
+                        "type": "string",
+                        "$ref": "@simulae/datatypes/mammalian_organ_systems.json"
+                    }
+                }
+            }
+        }
+    }
+}

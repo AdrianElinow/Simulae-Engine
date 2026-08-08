@@ -1,0 +1,66 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/OBJ/Human/right_leg.json",
+    "title": "Human Right Leg",
+    "allOf": [
+        {
+            "$ref": "@simulae/simulae_node.json"
+        }
+    ],
+    "properties": {
+        "nodetype": {
+            "const": "Object"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "const": "Right Leg"
+                },
+                "ComponentClass": {
+                    "const": "Limb"
+                },
+                "Side": {
+                    "const": "Right"
+                }
+            }
+        },
+        "attributes": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "unit": "meters",
+                    "generation": {
+                        "type": "derived_ratio",
+                        "source": "body_height",
+                        "ratio": {
+                            "distribution": "constant",
+                            "value": 0.45,
+                            "min": 0.45,
+                            "max": 0.45,
+                            "average": 0.45,
+                            "stddev": 0
+                        }
+                    }
+                },
+                "weight": {
+                    "type": "number",
+                    "unit": "kilograms",
+                    "generation": {
+                        "type": "derived_ratio",
+                        "source": "body_weight",
+                        "ratio": {
+                            "distribution": "constant",
+                            "value": 0.45,
+                            "min": 0.45,
+                            "max": 0.45,
+                            "average": 0.45,
+                            "stddev": 0
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

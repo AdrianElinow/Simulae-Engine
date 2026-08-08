@@ -1,0 +1,18 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/datatypes/mammalian_organ_systems.json",
+    "title": "Mammalian Organ System",
+    "type": "string",
+    "enum": [
+        "Skeletal",
+        "Muscular",
+        "Circulatory",
+        "Nervous",
+        "Lymphatic",
+        "Integumentary",
+        "Respiratory",
+        "Digestive",
+        "Excretory",
+        "Reproductive"
+    ]
+}

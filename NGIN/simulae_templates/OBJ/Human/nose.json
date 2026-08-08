@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/OBJ/Human/nose.json",
+    "title": "Human Nose",
+    "allOf": [
+        {
+            "$ref": "@simulae/simulae_node.json"
+        }
+    ],
+    "properties": {
+        "nodetype": {
+            "const": "Object"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "const": "Nose"
+                },
+                "ComponentClass": {
+                    "const": "Organ"
+                },
+                "System": {
+                    "const": "Respiratory/Sensory"
+                }
+            }
+        }
+    }
+}

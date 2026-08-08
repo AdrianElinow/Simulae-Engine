@@ -1,14 +1,57 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "@simulae/human.json",
+    "title": "Human",
+    "description": "A human person Simulae Actor with a human body component.",
     "allOf": [
         {
-            "$ref": "@simulae/simulae_node.json"
+            "$ref": "@simulae/simulae_actor.json"
         }
     ],
     "properties": {
         "nodetype": {
-            "const": "POI"
+            "const": "Person"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "species": {
+                    "const": "Human"
+                },
+                "gender": {
+                    "type": "string",
+                    "enum": [
+                        "Male",
+                        "Female"
+                    ],
+                    "distribution": {
+                        "type": "categorical",
+                        "weights": {
+                            "Male": 0.51,
+                            "Female": 0.49
+                        }
+                    }
+                }
+            }
+        },
+        "relations": {
+            "type": "object",
+            "properties": {
+                "components": {
+                    "type": "object",
+                    "properties": {
+                        "body": {
+                            "$ref": "@simulae/Human/human_body.json"
+                        }
+                    },
+                    "required": [
+                        "body"
+                    ]
+                }
+            }
         }
     }
 }

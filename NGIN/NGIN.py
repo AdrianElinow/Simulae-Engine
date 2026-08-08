@@ -1,6 +1,7 @@
 import sys, os, random
 
 from NGIN.implementation.lib.SimulaeNode import *
+from NGIN.implementation.lib.generators.simulae_node_generator_utils import generate_person_simulae_node, generate_simulae_node
 from NGIN.utilities.lib.ngin_utils import (
     load_json_from_file,
     save_json_to_file,
@@ -12,14 +13,14 @@ from NGIN.utilities.lib.ngin_utils import (
 )
 from NGIN.utilities.lib.ngin_console_utils import user_choice, robust_int_entry
 from NGIN.utilities.lib.ngin_console_log import WORLD_GEN_POPULATION_GROUP_CHANCE, WORLD_GEN_STICKINESS
-from NGIN.NGIN_config.madlibs import (
+from NGIN.config.madlibs import (
     FACTION_TYPES,
     MADLIBS_NOUNS,
     MADLIBS_SUFFIXES,
     POLICY_SCALE,
     PRESET_POLICIES,
 )
-from NGIN.NGIN_config.ngin_missions import NGIN_MISSIONS
+from NGIN.config.ngin_missions import NGIN_MISSIONS
 
 class NGIN():
 

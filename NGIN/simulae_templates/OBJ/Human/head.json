@@ -1,0 +1,90 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/OBJ/Human/head.json",
+    "title": "Human Head",
+    "allOf": [
+        {
+            "$ref": "@simulae/simulae_node.json"
+        }
+    ],
+    "properties": {
+        "nodetype": {
+            "const": "Object"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "const": "Head"
+                },
+                "species": {
+                    "const": "Human"
+                }
+            }
+        },
+        "attributes": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "unit": "meters",
+                    "generation": {
+                        "type": "derived_ratio",
+                        "source": "body_height",
+                        "ratio": {
+                            "distribution": "constant",
+                            "value": 0.15,
+                            "min": 0.15,
+                            "max": 0.15,
+                            "average": 0.15,
+                            "stddev": 0
+                        }
+                    }
+                },
+                "weight": {
+                    "type": "number",
+                    "unit": "kilograms",
+                    "generation": {
+                        "type": "derived_ratio",
+                        "source": "body_weight",
+                        "ratio": {
+                            "distribution": "constant",
+                            "value": 0.15,
+                            "min": 0.15,
+                            "max": 0.15,
+                            "average": 0.15,
+                            "stddev": 0
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "relations": {
+        "components": {
+            "skull": {
+                "$ref": "@simulae/Human/skull.json"
+            }
+        },
+        "contents": {
+            "eyes": {
+                "$ref": "@simulae/Human/eyes.json"
+            },
+            "ears": {
+                "$ref": "@simulae/Human/ears.json"
+            },
+            "nose": {
+                "$ref": "@simulae/Human/nose.json"
+            },
+            "mouth": {
+                "$ref": "@simulae/Human/mouth.json"
+            },
+            "hair": {
+                "$ref": "@simulae/Human/hair.json"
+            },
+            "teeth": {
+                "$ref": "@simulae/Human/teeth.json"
+            }
+        }
+    }
+}

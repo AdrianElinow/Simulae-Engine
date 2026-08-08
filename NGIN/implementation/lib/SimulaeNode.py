@@ -11,7 +11,7 @@ from NGIN.utilities.lib.social_scale_utils import (
     get_scale_diff,
     random_bell_curve_value,
 )
-from NGIN.NGIN_config.madlibs import *
+from NGIN.config.madlibs import *
 
 class SimulaeNode:
     '''
