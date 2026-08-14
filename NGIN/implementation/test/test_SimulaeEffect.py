@@ -1,6 +1,7 @@
 import unittest
 
-from NGIN.implementation.lib.SimulaeCondition import ConditionRuleType
+from NGIN.implementation.lib.SimulaeAction import SimulaeAction
+from NGIN.implementation.lib.SimulaeCondition import SimulaeCondition, ConditionRuleType
 from NGIN.implementation.lib.SimulaeEffect import SimulaeEffect, SimulaeEffectActionType
 from NGIN.implementation.lib.SimulaeEvent import SimulaeEvent
 from NGIN.implementation.lib.SimulaeNode import SimulaeNode
@@ -18,13 +19,29 @@ from NGIN.utilities.lib.SimulaeConstants import (
 )
 
 
+def condition(given_id, property_path, rule, value):
+    simulae_condition = SimulaeCondition(given_id)
+    simulae_condition.property_path = property_path
+    simulae_condition.rule = rule
+    simulae_condition.value = value
+    return simulae_condition
+
+
+def action(spec):
+    return SimulaeAction(spec)
+
+
 class TestSimulaeEffect(unittest.TestCase):
     def test_effect_initializes_as_meta_node_with_conditions_and_actions(self):
         effect = SimulaeEffect(
             "effect-1",
             name="Bruise",
-            conditions=[{"path": [ATTRIBUTES, "health"], "rule": "greater_than", "value": 0}],
-            actions=[{"action": "decrement", "bucket": "attributes", "key": "health", "value": 5}],
+            conditions=[
+                condition("condition-1", [ATTRIBUTES, "health"], ConditionRuleType.GREATER_THAN, 0)
+            ],
+            actions=[
+                action({"action": "decrement", "bucket": "attributes", "key": "health", "value": 5})
+            ],
         )
 
         self.assertEqual(effect.ID, "effect-1")
@@ -32,13 +49,44 @@ class TestSimulaeEffect(unittest.TestCase):
         self.assertEqual(effect.References[NAME], "Bruise")
         self.assertEqual(len(effect.Conditions), 1)
         self.assertEqual(len(effect.Actions), 1)
+        self.assertIsInstance(effect.Conditions[0], SimulaeCondition)
+        self.assertIsInstance(effect.Actions[0], SimulaeAction)
+
+    def test_effect_rejects_non_simulae_condition_and_action_inputs(self):
+        with self.assertRaises(TypeError):
+            SimulaeEffect(
+                "effect-1",
+                conditions=[{"path": [ATTRIBUTES, "health"], "rule": "greater_than", "value": 0}],
+            )
+
+        with self.assertRaises(TypeError):
+            SimulaeEffect(
+                "effect-1",
+                actions=[{"action": "decrement", "bucket": "attributes", "key": "health", "value": 5}],
+            )
+
+        with self.assertRaises(TypeError):
+            SimulaeEffect(
+                "effect-1",
+                conditions=[lambda **_kwargs: True],
+            )
+
+        with self.assertRaises(TypeError):
+            SimulaeEffect(
+                "effect-1",
+                actions=[lambda **_kwargs: None],
+            )
 
     def test_conditions_gate_effect_application(self):
         target = SimulaeNode(given_id="target-1", nodetype=OBJ, attributes={"health": 0})
         effect = SimulaeEffect(
             "effect-1",
-            conditions=[{"path": [ATTRIBUTES, "health"], "rule": "greater_than", "value": 0}],
-            actions=[{"action": "decrement", "bucket": "attributes", "key": "health", "value": 5}],
+            conditions=[
+                condition("condition-1", [ATTRIBUTES, "health"], ConditionRuleType.GREATER_THAN, 0)
+            ],
+            actions=[
+                action({"action": "decrement", "bucket": "attributes", "key": "health", "value": 5})
+            ],
         )
 
         report = effect.apply(target)
@@ -47,18 +95,16 @@ class TestSimulaeEffect(unittest.TestCase):
         self.assertEqual(target.get_attribute("health"), 0)
         self.assertEqual(report["conditions"][0]["passed"], False)
 
-    def test_condition_rule_enum_can_be_used_in_effect_condition_dicts(self):
+    def test_condition_rule_enum_can_be_used_in_effect_conditions(self):
         target = SimulaeNode(given_id="target-1", nodetype=OBJ, attributes={"health": 5})
         effect = SimulaeEffect(
             "effect-1",
             conditions=[
-                {
-                    "path": [ATTRIBUTES, "health"],
-                    "rule": ConditionRuleType.GREATER_THAN,
-                    "value": 0,
-                }
+                condition("condition-1", [ATTRIBUTES, "health"], ConditionRuleType.GREATER_THAN, 0)
             ],
-            actions=[{"action": "decrement", "bucket": "attributes", "key": "health", "value": 2}],
+            actions=[
+                action({"action": "decrement", "bucket": "attributes", "key": "health", "value": 2})
+            ],
         )
 
         report = effect.apply(target)
@@ -66,17 +112,19 @@ class TestSimulaeEffect(unittest.TestCase):
         self.assertTrue(report["applied"])
         self.assertEqual(target.get_attribute("health"), 3)
 
-    def test_effect_action_type_enum_can_be_used_in_action_dicts(self):
+    def test_effect_action_type_enum_can_be_used_in_actions(self):
         target = SimulaeNode(given_id="target-1", nodetype=OBJ, attributes={"health": 5})
         effect = SimulaeEffect(
             "effect-1",
             actions=[
-                {
-                    "action": SimulaeEffectActionType.INCREMENT,
-                    "bucket": "attributes",
-                    "key": "health",
-                    "value": 4,
-                }
+                action(
+                    {
+                        "action": SimulaeEffectActionType.INCREMENT,
+                        "bucket": "attributes",
+                        "key": "health",
+                        "value": 4,
+                    }
+                )
             ],
         )
 
@@ -90,17 +138,19 @@ class TestSimulaeEffect(unittest.TestCase):
         effect = SimulaeEffect(
             "effect-1",
             actions=[
-                {"action": "set", "bucket": "references", "key": NAME, "value": "Changed"},
-                {"action": "decrement", "bucket": "attributes", "key": "health", "value": 3},
-                {"action": "set", "bucket": "checks", "key": "bleeding", "value": True},
-                {"action": "set", "bucket": "abilities", "key": "walk", "value": "disabled"},
-                {
-                    "action": "set",
-                    "bucket": "memory",
-                    "category": EVENTS,
-                    "key": "effect-1",
-                    "value": {"summary": "Changed"},
-                },
+                action({"action": "set", "bucket": "references", "key": NAME, "value": "Changed"}),
+                action({"action": "decrement", "bucket": "attributes", "key": "health", "value": 3}),
+                action({"action": "set", "bucket": "checks", "key": "bleeding", "value": True}),
+                action({"action": "set", "bucket": "abilities", "key": "walk", "value": "disabled"}),
+                action(
+                    {
+                        "action": "set",
+                        "bucket": "memory",
+                        "category": EVENTS,
+                        "key": "effect-1",
+                        "value": {"summary": "Changed"},
+                    }
+                ),
             ],
         )
 
@@ -128,11 +178,11 @@ class TestSimulaeEffect(unittest.TestCase):
         effect = SimulaeEffect(
             "effect-1",
             actions=[
-                {"action": "remove", "bucket": REFERENCES, "key": NAME},
-                {"action": "remove", "bucket": ATTRIBUTES, "key": "health"},
-                {"action": "remove", "bucket": CHECKS, "key": "bleeding"},
-                {"action": "remove", "bucket": ABILITIES, "key": "walk"},
-                {"action": "remove", "bucket": MEMORY, "category": EVENTS, "key": "effect-1"},
+                action({"action": "remove", "bucket": REFERENCES, "key": NAME}),
+                action({"action": "remove", "bucket": ATTRIBUTES, "key": "health"}),
+                action({"action": "remove", "bucket": CHECKS, "key": "bleeding"}),
+                action({"action": "remove", "bucket": ABILITIES, "key": "walk"}),
+                action({"action": "remove", "bucket": MEMORY, "category": EVENTS, "key": "effect-1"}),
             ],
         )
 
@@ -151,24 +201,28 @@ class TestSimulaeEffect(unittest.TestCase):
         add_effect = SimulaeEffect(
             "add-effect",
             actions=[
-                {
-                    "action": "add",
-                    "bucket": "relations",
-                    "relation_type": COMPONENTS,
-                    "node": component,
-                }
+                action(
+                    {
+                        "action": "add",
+                        "bucket": "relations",
+                        "relation_type": COMPONENTS,
+                        "node": component,
+                    }
+                )
             ],
         )
         remove_effect = SimulaeEffect(
             "remove-effect",
             actions=[
-                {
-                    "action": "remove",
-                    "bucket": "relations",
-                    "relation_type": COMPONENTS,
-                    "nodetype": OBJ,
-                    "node_id": "component-1",
-                }
+                action(
+                    {
+                        "action": "remove",
+                        "bucket": "relations",
+                        "relation_type": COMPONENTS,
+                        "nodetype": OBJ,
+                        "node_id": "component-1",
+                    }
+                )
             ],
         )
 
@@ -185,14 +239,16 @@ class TestSimulaeEffect(unittest.TestCase):
         effect = SimulaeEffect(
             "effect-1",
             actions=[
-                {
-                    "action": "transmute",
-                    "bucket": "relations",
-                    "relation_type": COMPONENTS,
-                    "old_node_id": old_component.ID,
-                    "old_nodetype": OBJ,
-                    "node": new_component,
-                }
+                action(
+                    {
+                        "action": "transmute",
+                        "bucket": "relations",
+                        "relation_type": COMPONENTS,
+                        "old_node_id": old_component.ID,
+                        "old_nodetype": OBJ,
+                        "node": new_component,
+                    }
+                )
             ],
         )
 
@@ -207,20 +263,24 @@ class TestSimulaeEffect(unittest.TestCase):
         target = SimulaeNode(given_id="target-1", nodetype=OBJ, attributes={"health": 10})
         nested = SimulaeEffect(
             "nested-effect",
-            actions=[{"action": "decrement", "bucket": "attributes", "key": "health", "value": 2}],
+            actions=[
+                action({"action": "decrement", "bucket": "attributes", "key": "health", "value": 2})
+            ],
         )
         effect = SimulaeEffect(
             "effect-1",
             name="Strike",
             actions=[
-                nested,
-                {
-                    "action": "create_event",
-                    "id": "event-1",
-                    "event_class": "physical",
-                    "event_type": "damage",
-                    "event_subtype": "strike",
-                },
+                action(nested),
+                action(
+                    {
+                        "action": "create_event",
+                        "id": "event-1",
+                        "event_class": "physical",
+                        "event_type": "damage",
+                        "event_subtype": "strike",
+                    }
+                ),
             ],
         )
 
@@ -246,11 +306,11 @@ class TestSimulaeEffect(unittest.TestCase):
             "effect-1",
             name="Area Strike",
             conditions=[
-                {"path": [ATTRIBUTES, "health"], "rule": "greater_than", "value": 0},
-                {"path": [ATTRIBUTES, "health"], "rule": "less_than_or_equal", "value": 20},
+                condition("condition-1", [ATTRIBUTES, "health"], ConditionRuleType.GREATER_THAN, 0),
+                condition("condition-2", [ATTRIBUTES, "health"], ConditionRuleType.LESS_THAN_OR_EQUAL, 20),
             ],
             actions=[
-                {"action": "decrement", "bucket": "attributes", "key": "health", "value": 5}
+                action({"action": "decrement", "bucket": "attributes", "key": "health", "value": 5})
             ],
         )
 
@@ -282,25 +342,27 @@ class TestSimulaeEffect(unittest.TestCase):
         effect = SimulaeEffect(
             "effect-1",
             actions=[
-                {
-                    "action": "create_events",
-                    "event_class": "physical",
-                    "sources": ["source-override"],
-                    "observers": ["observer-override"],
-                    "events": [
-                        {
-                            "id": "event-1",
-                            "event_type": "damage",
-                            "event_subtype": "puncture",
-                        },
-                        {
-                            "id": "event-2",
-                            "event_type": "status",
-                            "event_subtype": "bleeding",
-                            "targets": ["target-2"],
-                        },
-                    ],
-                }
+                action(
+                    {
+                        "action": "create_events",
+                        "event_class": "physical",
+                        "sources": ["source-override"],
+                        "observers": ["observer-override"],
+                        "events": [
+                            {
+                                "id": "event-1",
+                                "event_type": "damage",
+                                "event_subtype": "puncture",
+                            },
+                            {
+                                "id": "event-2",
+                                "event_type": "status",
+                                "event_subtype": "bleeding",
+                                "targets": ["target-2"],
+                            },
+                        ],
+                    }
+                )
             ],
         )
 

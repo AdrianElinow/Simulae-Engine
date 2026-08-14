@@ -92,6 +92,33 @@ class TestSimulaeTemplateResolver(unittest.TestCase):
         self.assertEqual(resolved["properties"]["leaf"]["$id"], "@simulae/leaf.json")
         self.assertEqual(resolved["properties"]["leaf"]["type"], "string")
 
+    def test_local_fragment_refs_are_preserved(self):
+        self.write_schema(
+            "simulae/action.json",
+            {
+                "$id": "@simulae/action.json",
+                "type": "object",
+                "properties": {
+                    "references": {
+                        "$ref": "#/$defs/actionReferences",
+                    }
+                },
+                "$defs": {
+                    "actionReferences": {
+                        "type": "object",
+                    }
+                },
+            },
+        )
+
+        resolved = self.make_resolver().resolve("@simulae/action.json")
+
+        self.assertEqual(
+            resolved["properties"]["references"],
+            {"$ref": "#/$defs/actionReferences"},
+        )
+        self.assertEqual(resolved["$defs"]["actionReferences"], {"type": "object"})
+
     def test_flatten_compositions_is_on_by_default_and_local_properties_win(self):
         self.write_schema(
             "simulae/base.json",
