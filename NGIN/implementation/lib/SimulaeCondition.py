@@ -20,6 +20,7 @@ from NGIN.utilities.lib.SimulaeConstants import (
     NODETYPE,
     REFERENCES,
     RELATIONS,
+    SCALES,
 )
 
 
@@ -39,8 +40,6 @@ class SimulaeCondition(SimulaeNode):
             nodetype=CND,
         )
 
-        if not self._is_valid_property_path(property_path):
-            raise ValueError("Must provide valid property path")
         if not isinstance(rule, ConditionRuleType):
             raise ValueError("Must provide valid rule type")
 
@@ -48,6 +47,15 @@ class SimulaeCondition(SimulaeNode):
         self.rule: ConditionRuleType = rule
         self.value: Any = None
         self.exclusivity: tuple[bool, bool] | None = None
+
+        if property_path is None:
+            if rule != ConditionRuleType.EXISTS or value is not None or exclusivity is not None:
+                raise ValueError("Must provide valid property path")
+            return
+
+        if not self._is_valid_property_path(property_path):
+            raise ValueError("Must provide valid property path")
+
         self._initialize_for_rule(value, exclusivity)
 
     def _initialize_for_rule(
@@ -127,8 +135,12 @@ class SimulaeCondition(SimulaeNode):
         current_value = self._node_subject(target)
 
         for prop in property_path:
+            current_value = self._node_subject(current_value)
+
             if isinstance(current_value, dict) and prop in current_value:
                 current_value = current_value[prop]
+            elif isinstance(current_value, (list, tuple)) and self._is_list_index(prop, current_value):
+                current_value = current_value[int(prop)]
             elif hasattr(current_value, prop):
                 current_value = getattr(current_value, prop)
             else:
@@ -145,6 +157,8 @@ class SimulaeCondition(SimulaeNode):
         raise ValueError(f"Invalid rule for basic evaluation: {self.rule}")
 
     def evaluate_numeric(self, target_property_value) -> bool:
+        target_property_value = self._numeric_subject(target_property_value)
+
         if not isinstance(target_property_value, (int, float)):
             raise ValueError(
                 f"Target property value must be numeric for numeric evaluation, got: {target_property_value}"
@@ -166,6 +180,8 @@ class SimulaeCondition(SimulaeNode):
         raise ValueError(f"Invalid rule for numeric evaluation: {self.rule}")
 
     def evaluate_numeric_range(self, target_property_value) -> bool:
+        target_property_value = self._numeric_subject(target_property_value)
+
         if not isinstance(target_property_value, (int, float)):
             raise ValueError(
                 f"Target property value must be numeric for numeric range evaluation, got: {target_property_value}"
@@ -224,6 +240,7 @@ class SimulaeCondition(SimulaeNode):
                 RELATIONS: target.Relations,
                 CHECKS: target.Checks,
                 ABILITIES: target.Abilities,
+                SCALES: target.Scales,
                 MEMORY: target.Memory,
             }
         return target
@@ -248,3 +265,16 @@ class SimulaeCondition(SimulaeNode):
             and len(exclusivity) == 2
             and all(isinstance(item, bool) for item in exclusivity)
         )
+
+    def _numeric_subject(self, value: Any) -> Any:
+        if isinstance(value, (dict, list, tuple, set)):
+            return len(value)
+
+        return value
+
+    def _is_list_index(self, prop: str, values: list | tuple) -> bool:
+        if not prop.isdecimal():
+            return False
+
+        index = int(prop)
+        return 0 <= index < len(values)

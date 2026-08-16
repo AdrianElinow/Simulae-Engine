@@ -2,8 +2,8 @@
 
 ## Available Gamemodes
 - [[Social Deduction]]
-- [[Blood on the Clocktower]]
-- [[Trouble in Terrorist Town]]
+	- [[Blood on the Clocktower]]
+	- [[Trouble in Terrorist Town]]
 
 - [[Faction Warfare]]
 - [[Political Intrigue]]

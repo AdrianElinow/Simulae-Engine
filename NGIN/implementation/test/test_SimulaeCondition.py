@@ -3,7 +3,18 @@ import unittest
 from NGIN.implementation.lib.ConditionRule import ConditionRuleType
 from NGIN.implementation.lib.SimulaeCondition import SimulaeCondition
 from NGIN.implementation.lib.SimulaeNode import SimulaeNode
-from NGIN.utilities.lib.SimulaeConstants import ATTRIBUTES, CND, NODETYPE, OBJ
+from NGIN.utilities.lib.SimulaeConstants import (
+    ATTRIBUTES,
+    CND,
+    CONTENTS,
+    NAME,
+    NODETYPE,
+    OBJ,
+    POI,
+    REFERENCES,
+    RELATIONS,
+    SCALES,
+)
 
 
 class TestSimulaeCondition(unittest.TestCase):
@@ -22,8 +33,15 @@ class TestSimulaeCondition(unittest.TestCase):
         self.assertEqual(condition.value, 0)
 
     def test_rejects_invalid_constructor_inputs(self):
+        blank = SimulaeCondition("condition-1")
+        self.assertEqual(blank.property_path, [])
+        self.assertEqual(blank.rule, ConditionRuleType.EXISTS)
+
         with self.assertRaises(ValueError):
-            SimulaeCondition("condition-1")
+            SimulaeCondition("condition-1", property_path=[])
+
+        with self.assertRaises(ValueError):
+            SimulaeCondition("condition-1", rule=ConditionRuleType.GREATER_THAN, value=0)
 
         with self.assertRaises(ValueError):
             SimulaeCondition("condition-1", property_path=["status"], rule="exists")
@@ -147,16 +165,126 @@ class TestSimulaeCondition(unittest.TestCase):
         self.assertTrue(excludes.evaluate(subject))
 
     def test_extracts_from_simulae_node_state(self):
-        target = SimulaeNode(given_id="target-1", nodetype=OBJ, attributes={"health": 6})
+        target = SimulaeNode(
+            given_id="target-1",
+            nodetype=POI,
+            references={NAME: "Ada"},
+            attributes={"health": 6},
+            scales={"Trust": {"Team": 4}},
+        )
         condition = SimulaeCondition(
             "condition-1",
             property_path=[ATTRIBUTES, "health"],
             rule=ConditionRuleType.GREATER_THAN,
             value=0,
         )
+        name_condition = SimulaeCondition(
+            "condition-2",
+            property_path=[REFERENCES, NAME],
+            rule=ConditionRuleType.EQUALS,
+            value="Ada",
+        )
+        scale_condition = SimulaeCondition(
+            "condition-3",
+            property_path=[SCALES, "Trust", "Team"],
+            rule=ConditionRuleType.EQUALS,
+            value=4,
+        )
 
         self.assertTrue(condition.evaluate(target))
-        self.assertEqual(condition.extract_property(target, [NODETYPE]), OBJ)
+        self.assertTrue(name_condition.evaluate(target))
+        self.assertTrue(scale_condition.evaluate(target))
+        self.assertEqual(condition.extract_property(target, [NODETYPE]), POI)
+
+    def test_extracts_from_nested_simulae_nodes_in_relations(self):
+        container = SimulaeNode(given_id="container-1", nodetype=OBJ)
+        child = SimulaeNode(
+            given_id="child-1",
+            nodetype=OBJ,
+            references={NAME: "Battery"},
+            attributes={"charge": 7},
+        )
+        container.Relations[CONTENTS][OBJ][child.ID] = child
+
+        charge_condition = SimulaeCondition(
+            "condition-1",
+            property_path=[RELATIONS, CONTENTS, OBJ, child.ID, ATTRIBUTES, "charge"],
+            rule=ConditionRuleType.GREATER_THAN_OR_EQUAL,
+            value=5,
+        )
+        name_condition = SimulaeCondition(
+            "condition-2",
+            property_path=[RELATIONS, CONTENTS, OBJ, child.ID, REFERENCES, NAME],
+            rule=ConditionRuleType.EQUALS,
+            value="Battery",
+        )
+        missing_nested_condition = SimulaeCondition(
+            "condition-3",
+            property_path=[RELATIONS, CONTENTS, OBJ, "missing-child", ATTRIBUTES, "charge"],
+            rule=ConditionRuleType.NOT_EXISTS,
+        )
+
+        self.assertTrue(charge_condition.evaluate(container))
+        self.assertTrue(name_condition.evaluate(container))
+        self.assertTrue(missing_nested_condition.evaluate(container))
+
+    def test_extracts_from_generic_json_objects(self):
+        target = {
+            NODETYPE: POI,
+            REFERENCES: {NAME: "Bea"},
+            ATTRIBUTES: {
+                "health": 9,
+                "inventory": [
+                    {"name": "bandage", "quantity": 2},
+                    {"name": "radio", "quantity": 1},
+                ],
+            },
+        }
+
+        name_condition = SimulaeCondition(
+            "condition-1",
+            property_path=[REFERENCES, NAME],
+            rule=ConditionRuleType.EQUALS,
+            value="Bea",
+        )
+        list_item_condition = SimulaeCondition(
+            "condition-2",
+            property_path=[ATTRIBUTES, "inventory", "1", "name"],
+            rule=ConditionRuleType.EQUALS,
+            value="radio",
+        )
+        missing_list_item = SimulaeCondition(
+            "condition-3",
+            property_path=[ATTRIBUTES, "inventory", "4", "name"],
+            rule=ConditionRuleType.NOT_EXISTS,
+        )
+
+        self.assertTrue(name_condition.evaluate(target))
+        self.assertTrue(list_item_condition.evaluate(target))
+        self.assertTrue(missing_list_item.evaluate(target))
+
+    def test_extracts_from_nested_json_relations(self):
+        target = {
+            RELATIONS: {
+                CONTENTS: {
+                    OBJ: {
+                        "child-1": {
+                            NODETYPE: OBJ,
+                            REFERENCES: {NAME: "Battery"},
+                            ATTRIBUTES: {"charge": 7},
+                        },
+                    },
+                },
+            },
+        }
+        condition = SimulaeCondition(
+            "condition-1",
+            property_path=[RELATIONS, CONTENTS, OBJ, "child-1", ATTRIBUTES, "charge"],
+            rule=ConditionRuleType.EQUALS,
+            value=7,
+        )
+
+        self.assertTrue(condition.evaluate(target))
 
     def test_missing_non_basic_property_evaluates_false(self):
         condition = SimulaeCondition(

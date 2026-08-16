@@ -1,20 +1,20 @@
 from enum import Enum
 
 class ConditionRuleType(Enum):
-    EXISTS = 1,
-    NOT_EXISTS = 2,
-    EQUALS = 3,
-    NOT_EQUALS = 4,
-    LESS_THAN = 5,
-    LESS_THAN_OR_EQUAL = 6,
-    GREATER_THAN = 7,
-    GREATER_THAN_OR_EQUAL = 8,
-    WITHIN_RANGE = 9,
-    BEYOND_RANGE = 10,
-    STRING_CONTAINS = 11,
-    REGEX_MATCHES = 13,
-    LIST_CONTAINS = 14,
-    NOT_LIST_CONTAINS = 15
+    EXISTS = 'EXISTS',
+    NOT_EXISTS = 'NOT_EXISTS',
+    EQUALS = '=',
+    NOT_EQUALS = '!=',
+    LESS_THAN = '<',
+    LESS_THAN_OR_EQUAL = '<=',
+    GREATER_THAN = '>',
+    GREATER_THAN_OR_EQUAL = '>=',
+    WITHIN_RANGE = 'BETWEEN',
+    BEYOND_RANGE = 'NOT_BETWEEN',
+    STRING_CONTAINS = 'CONTAINS',
+    REGEX_MATCHES = 'R_MATCH',
+    LIST_CONTAINS = 'IN',
+    NOT_LIST_CONTAINS = 'NOT_IN'
 
 BASIC_RULES = [ConditionRuleType.EXISTS, ConditionRuleType.NOT_EXISTS]
 

@@ -1,8 +1,8 @@
 import unittest
 
 from NGIN.ai.lib.socialization_constants import SOCIAL_INTERACTION_QUALIFIERS, SOCIAL_INTERACTION_TYPES
-from .SimulaeNode import SimulaeNode
-from .NGIN_AI import *
+from NGIN.implementation.lib.SimulaeNode import SimulaeNode
+from NGIN.ai.lib import *
 
 class Test_NGIN_AI_Planning(unittest.TestCase):
 

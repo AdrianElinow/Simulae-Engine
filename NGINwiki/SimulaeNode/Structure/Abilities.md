@@ -1,5 +1,5 @@
 The abilities structure details the various actions that can be performed by the [[SimulaeNode]]. These actions may have:
-- Requirements - set of [[Condition]]s that must be satisfied 
+- Requirements - set of [[Simulae Condition]]s that must be satisfied 
 - [[Simulae Effect]]
 
 ```json

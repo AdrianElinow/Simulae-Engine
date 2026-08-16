@@ -6,5 +6,3 @@
 3. Battles, scouting, and control changes are resolved as [[Simulae Event]] chains.
 4. Reputation, supply lines, and front lines are updated for the next cycle.
 
-## Simulae Fit
-- Uses [[Task]], [[Plan]], [[Simulae Event]], and faction-level social relationships.

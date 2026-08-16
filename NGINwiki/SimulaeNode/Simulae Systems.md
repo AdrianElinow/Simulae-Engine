@@ -35,10 +35,10 @@
 - Economy
 
 ## Gameplay Systems
-- Magic
+- Magic - [[Abilities]]
 	- Spells
 	- Rituals
-- Technology
+- Technology - [[Simulae Machine]]s
 	- Machines
 	- Computers
 	- Cybernetics
