@@ -1,12 +1,12 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-set -eu
+set -euo pipefail
 
-script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+script_dir="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repository_root="$(CDPATH= cd -- "$script_dir/../.." && pwd)"
 
 python_path="$repository_root"
-if [ -n "${PYTHONPATH:-}" ]; then
+if [[ -n "${PYTHONPATH:-}" ]]; then
     python_path="$python_path:$PYTHONPATH"
 fi
 export PYTHONPATH="$python_path"
@@ -21,7 +21,7 @@ else
 fi
 
 exec "$python_command" -m unittest discover \
-    -s "$repository_root/NGIN" \
+    -s "$script_dir/test" \
     -p 'test*.py' \
     -t "$repository_root" \
     -v
