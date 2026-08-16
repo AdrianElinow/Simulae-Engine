@@ -4,9 +4,9 @@ A step is an individual component of an [[SimulaeNode/Simulae Actor]]'s [[Plan]]
 Types of Steps
 - Linear
 - Conditional
-	- Branches off to other steps based on [[Condition]]s allowing for branching planning, backup plans, etc
+	- Branches off to other steps based on [[Simulae Condition]]s allowing for branching planning, backup plans, etc
 - Promise
-	- Steps that represent an un-planned step, serving as a promise or todo note that the step will be planned at some point, including under certain [[Condition]]. 
+	- Steps that represent an un-planned step, serving as a promise or todo note that the step will be planned at some point, including under certain [[Simulae Condition]]. 
 	- This serves as both an optimization measure as well as a representation of the real concept of re-evaluating one's plans on the fly or putting of planning until later.
 
 ### Step Statuses

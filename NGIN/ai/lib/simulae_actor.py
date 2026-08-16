@@ -2,7 +2,7 @@ import uuid
 from collections import deque
 from .socialization_constants import SOCIAL_INTERACTION_TYPES, SOCIAL_INTERACTION_QUALIFIERS, RESPONSE_WEIGHTS, EVENT_CLASSES, EVENT_VISIBILITIES, SOCIAL_RESPONSE_CANDIDATES, SOCIAL_RESPONSE_SUBTYPES, CRAFTING_RECIPES
 from NGIN.implementation.lib.SimulaeNode import SimulaeNode
-from .ngin_action import Action 
+from .ngin_action import SimulaeAction 
 from .task_plan import TaskPlan
 from .socialization_utils import _canonical_social_type, _node_matches_criteria, _normalize_search_key, _normalize_social_key, get_heuristic, get_targets_nearby_node, nodes_are_adjacent
 from NGIN.utilities.lib.ngin_utils import logAll, logWarning
@@ -30,53 +30,53 @@ class SimulaeActor(SimulaeNode):
 
         self.Attributes[STATUS_THRESHOLDS] = {
             THREAT: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             HUNGER: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             THIRST: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             EXHAUSTION: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             SICK: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             TEMPERATURE: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 50,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             },
             LONELINESS: {
-                MINIMUM: 10,
+                MIN: 10,
                 LOW: 20,
                 VALUE: 0,
                 HIGH: 80,
-                MAXIMUM: 90
+                MAX: 90
             }
         }
 
@@ -409,31 +409,31 @@ class SimulaeActor(SimulaeNode):
         if task == HUNGER:
             target = SimulaeNode(given_id='food', nodetype=OBJ, references={NAME: 'food'})
             acquisition = self.acquire(target)
-            return TaskPlan(target, Action.USE, acquisition)
+            return TaskPlan(target, SimulaeAction.USE, acquisition)
 
         if task == THIRST:
             target = SimulaeNode(given_id='drink', nodetype=OBJ, references={NAME: 'drink'})
             acquisition = self.acquire(target)
-            return TaskPlan(target, Action.USE, acquisition)
+            return TaskPlan(target, SimulaeAction.USE, acquisition)
 
         if task in [SLEEP, EXHAUSTION]:
             target = SimulaeNode(given_id='bed', nodetype=OBJ, references={NAME: 'bed'})
             acquisition = self.acquire(target)
-            return TaskPlan(target, Action.USE, acquisition)
+            return TaskPlan(target, SimulaeAction.USE, acquisition)
 
         if task == SICK:
             target = SimulaeNode(given_id='medicine', nodetype=OBJ, references={NAME: 'medicine'})
             acquisition = self.acquire(target)
-            return TaskPlan(target, Action.USE, acquisition)
+            return TaskPlan(target, SimulaeAction.USE, acquisition)
 
         if task == LONELINESS:
             target = SimulaeNode(given_id='friend', nodetype=POI, references={NAME: 'friend'})
             # Social contact is search-first. We do not "take" people.
-            return TaskPlan(target, Action.INTERACT, [(Action.SEARCH, target)])
+            return TaskPlan(target, SimulaeAction.INTERACT, [(SimulaeAction.SEARCH, target)])
 
         if task in [HOT, COLD]:
             target = SimulaeNode(given_id='shelter', nodetype=LOC, references={NAME: 'shelter'})
-            return TaskPlan(target, Action.GOTO, [(Action.SEARCH, target)])
+            return TaskPlan(target, SimulaeAction.GOTO, [(SimulaeAction.SEARCH, target)])
 
         return None
 
@@ -445,7 +445,7 @@ class SimulaeActor(SimulaeNode):
         # We do not yet have combat or tactical terrain, so the safest short
         # term reaction is to search for cover and then move toward it.
         target = SimulaeNode(given_id='cover', nodetype=LOC, references={NAME: 'cover'})
-        return TaskPlan(target, Action.GOTO, [(Action.SEARCH, target)])
+        return TaskPlan(target, SimulaeAction.GOTO, [(SimulaeAction.SEARCH, target)])
 
     def act_next(self, prioritized=False):
         """Execute one step from the highest-priority active plan."""
@@ -510,7 +510,7 @@ class SimulaeActor(SimulaeNode):
         action, target = next_action
         resolved_target = target if target is not None else plan.target
 
-        if action == Action.GOTO:
+        if action == SimulaeAction.GOTO:
             # First try the shared world index so strings like "camp" resolve
             # to the actual location node rather than being stored verbatim.
             destination = self._resolve_location_target(resolved_target)
@@ -538,7 +538,7 @@ class SimulaeActor(SimulaeNode):
             logAll(f'went to {resolved_target}')
             return next_action
 
-        if action == Action.ACQUIRE:
+        if action == SimulaeAction.ACQUIRE:
             # Umbrella action used by some plan builders. We resolve it into a
             # lightweight acquire attempt so the caller gets a visible step.
             acquisition_plan = self.acquire(resolved_target)
@@ -546,7 +546,7 @@ class SimulaeActor(SimulaeNode):
                 logAll(f'acquired route for {resolved_target}: {acquisition_plan}')
             return next_action
 
-        if action == Action.SEARCH:
+        if action == SimulaeAction.SEARCH:
             # Search first looks in the actor's immediate area and then across
             # the world index. We keep the result in memory so later actions can
             # reason about it without having to scan again.
@@ -568,7 +568,7 @@ class SimulaeActor(SimulaeNode):
                 logAll(f'search found no matches for {resolved_target}')
             return next_action
 
-        if action == Action.TAKE:
+        if action == SimulaeAction.TAKE:
             candidate = self._resolve_owned_candidate(resolved_target, relation_types=(CONTENTS, ATTACHMENTS))
 
             if not candidate:
@@ -602,7 +602,7 @@ class SimulaeActor(SimulaeNode):
             logAll(f'took {candidate}')
             return (action, candidate)
 
-        if action == Action.USE:
+        if action == SimulaeAction.USE:
             candidate = self._resolve_owned_candidate(resolved_target, relation_types=(CONTENTS, ATTACHMENTS))
 
             if not candidate:
@@ -668,7 +668,7 @@ class SimulaeActor(SimulaeNode):
             logAll(f'used {candidate} with effects {effects}')
             return (action, candidate)
 
-        if action == Action.MAKE:
+        if action == SimulaeAction.MAKE:
             recipe = self.get_recipe_definition(resolved_target)
 
             if not recipe:
@@ -718,7 +718,7 @@ class SimulaeActor(SimulaeNode):
             logAll(f'made {candidate}')
             return (action, candidate)
 
-        if action == Action.INTERACT:
+        if action == SimulaeAction.INTERACT:
             logAll(f'interacted with {resolved_target}')
             return next_action
 
@@ -801,7 +801,7 @@ class SimulaeActor(SimulaeNode):
     
     def is_overheated(self):
         temp = self.get_attribute(TEMPERATURE)
-        temp_threshold = self.get_status_threshold(TEMPERATURE, MAXIMUM)
+        temp_threshold = self.get_status_threshold(TEMPERATURE, MAX)
         if temp and temp_threshold and temp >= temp_threshold:
             return True
         return False
@@ -815,7 +815,7 @@ class SimulaeActor(SimulaeNode):
 
     def is_freezing(self):
         temp = self.get_attribute(TEMPERATURE)
-        temp_threshold = self.get_status_threshold(TEMPERATURE, MINIMUM)
+        temp_threshold = self.get_status_threshold(TEMPERATURE, MIN)
         if temp and temp_threshold and temp <= temp_threshold:
             return True
         return False
@@ -842,16 +842,16 @@ class SimulaeActor(SimulaeNode):
         if path is None:
             resolved_target = self._resolve_location_target(target)
             if resolved_target:
-                return [(Action.GOTO, resolved_target)]
+                return [(SimulaeAction.GOTO, resolved_target)]
 
-            return [(Action.GOTO, target)]
+            return [(SimulaeAction.GOTO, target)]
 
         if len(path) <= 1:
             return []
 
         # The first node in the path is our current location, so only emit the
         # remaining hops.
-        return [(Action.GOTO, loc) for loc in path[1:]]
+        return [(SimulaeAction.GOTO, loc) for loc in path[1:]]
 
     def _target_label(self, target):
         """Return the most useful readable label for a target."""
@@ -1079,15 +1079,15 @@ class SimulaeActor(SimulaeNode):
             if candidate.Nodetype == LOC:
                 actions = self.pathfind_to(candidate)
             elif nodes_are_adjacent(self, candidate):
-                actions = [(Action.TAKE, candidate)]
+                actions = [(SimulaeAction.TAKE, candidate)]
             else:
                 candidate_location = candidate.get_location()
 
                 if candidate_location:
                     actions = self.pathfind_to(candidate_location)
-                    actions.append((Action.TAKE, candidate))
+                    actions.append((SimulaeAction.TAKE, candidate))
                 else:
-                    actions = [(Action.SEARCH, candidate)]
+                    actions = [(SimulaeAction.SEARCH, candidate)]
 
             route_options.append((get_heuristic(actions, actor=self, target=candidate), actions))
 
@@ -1129,11 +1129,11 @@ class SimulaeActor(SimulaeNode):
             if crafting_loc:
                 actions.extend(self.pathfind_to(crafting_loc)) # go to workstation
 
-            actions.append((Action.MAKE,target)) # make item
+            actions.append((SimulaeAction.MAKE,target)) # make item
             return actions
 
         # we are SOL
-        return [(Action.SEARCH, target)]
+        return [(SimulaeAction.SEARCH, target)]
     
     def status_summary(self):
         summary = f"Actor: {self.summary()}\n"

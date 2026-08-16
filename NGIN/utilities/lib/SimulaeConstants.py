@@ -1,3 +1,4 @@
+NODE = "Node" # Node
 FAC = 'Faction' # Faction
 POI = 'Person' # Person (of Interest)
 PTY = 'Party' # Party
@@ -6,6 +7,8 @@ OBJ = 'Object' # Object
 
 EVT = 'Event' # Event
 CND = 'Condition' # Conditional
+EFX = 'Effect' # Effect
+ACT = 'Action' # Action
 
 SRC = "Source" # source
 TGT = "Target" # target
@@ -31,13 +34,27 @@ DISPOSITION_SUFFIX = "Disposition"
 POLICY_DISPOSITION = "PolicyDisposition"
 SOCIAL_DISPOSITION = "SocialDisposition"
 
+NODE_ID = NODE + ID
+FAC_ID = FAC + ID
+POI_ID = POI + ID
+PTY_ID = PTY + ID
+LOC_ID = LOC + ID
+OBJ_ID = OBJ + ID
+EVT_ID = EVT + ID
+CND_ID = CND + ID
+EFX_ID = EFX + ID
+ACT_ID = ACT + ID
+TGT_ID = TGT + ID
+SRC_ID = SRC + ID
+OBS_ID = OBS + ID
+
 ALL_NODE_TYPES = [FAC,POI,PTY,LOC,OBJ]
 PHYSICAL_NODETYPES = [POI,PTY,LOC,OBJ] # person, people, place, thing
 SOCIAL_NODE_TYPES = [FAC,POI,PTY]
 GROUP_NODE_TYPES = [FAC,PTY]
 PEOPLE_NODE_TYPES = [POI,PTY]
 INANIMATE_NODE_TYPES = [LOC,OBJ]
-META_NODE_TYPES = [EVT, CND]
+META_NODE_TYPES = [EVT, CND, EFX, ACT]
 
 RELATIONS = "Relations"
 CONTENTS = "Contents"
@@ -45,6 +62,11 @@ COMPONENTS = "Components"
 ATTACHMENTS = "Attachments"
 PHYSICAL_RELATIVE_TYPES = [CONTENTS, COMPONENTS, ATTACHMENTS, ADJACENT]
 RELATION_TYPES = PHYSICAL_RELATIVE_TYPES + PHYSICAL_NODETYPES
+
+START = "Start"
+END = "End"
+BEFORE = "Before"
+AFTER = "After"
 
 EVENTS = "Events"
 TIMELINE = "Timeline"
@@ -95,30 +117,30 @@ SCALE_DEGREE_DESCRIPTORS = [
     "Diametrically ",      # 9 â€” categorical divergence
 ]
 
-STATUS_THRESHOLDS = "status_thresholds"
-THREAT = "threat"
-HUNGER = "hunger"
-THIRST = "thirst"
-DRINK = "drink"
-SLEEP = "sleep"
-SICK = "sick"
-TEMPERATURE = "temperature"
-COLD = "cold"
-HOT = "hot"
-EXHAUSTION = "exhaustion"
-LONELINESS = "loneliness"
-LOW = "low"
-HIGH = "high"
-MINIMUM = "min"
-MAXIMUM = "max"
-VALUE = "value"
+STATUS_THRESHOLDS = "StatusThresholds"
+THREAT = "Threat"
+HUNGER = "Hunger"
+THIRST = "Thirst"
+DRINK = "Drink"
+SLEEP = "Sleep"
+SICK = "Sick"
+TEMPERATURE = "Temperature"
+COLD = "Cold"
+HOT = "Hot"
+EXHAUSTION = "Exhaustion"
+LONELINESS = "Loneliness"
+LOW = "Low"
+HIGH = "High"
+MIN = "Minimum"
+MAX = "Maximum"
+VALUE = "Value"
 
 STATUS_ATTRIBUTES = [HUNGER, THIRST, HOT, COLD, EXHAUSTION, LONELINESS, SICK]
 
-PRIORITY_MODIFIERS = "priority_modifiers"
-CRITICAL_PRIORITY = "critical_priority"
-HIGH_PRIORITY = "high_priority"
-MEDIUM_PRIORITY = "medium_priority"
-LOW_PRIORITY = "low_priority"
+PRIORITY_MODIFIERS = "PriorityModifiers"
+CRITICAL_PRIORITY = "CriticalPriority"
+HIGH_PRIORITY = "highPriority"
+MEDIUM_PRIORITY = "mediumPriority"
+LOW_PRIORITY = "lowPriority"
 
 TASK_PRIORITIES = [CRITICAL_PRIORITY, HIGH_PRIORITY, MEDIUM_PRIORITY, LOW_PRIORITY]

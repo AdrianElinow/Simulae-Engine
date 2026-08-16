@@ -44,7 +44,7 @@
                     "type": "object",
                     "properties": {
                         "body": {
-                            "$ref": "@simulae/Human/human_body.json"
+                            "$ref": "@simulae/organism/human/human_body.json"
                         }
                     },
                     "required": [

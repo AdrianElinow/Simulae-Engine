@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "@simulae/OBJ/Human/brain.json",
+    "$id": "@simulae/OBJ/organism/human/brain.json",
     "title": "Human Brain",
     "allOf": [
         {

@@ -1,8 +1,8 @@
 import unittest
 
 from NGIN.ai.lib.socialization_constants import SOCIAL_INTERACTION_QUALIFIERS, SOCIAL_INTERACTION_TYPES
-from .SimulaeNode import SimulaeNode
-from .NGIN_AI import *
+from NGIN.implementation.lib.SimulaeNode import SimulaeNode
+from NGIN.ai.lib import *
 
 class Test_NGIN_AI_Planning(unittest.TestCase):
 
@@ -110,7 +110,7 @@ class Test_NGIN_AI_Planning(unittest.TestCase):
 
         hunger_plan = self.actor.plans[HUNGER]
         self.assertIsInstance(hunger_plan, TaskPlan)
-        self.assertEqual(hunger_plan.action, Action.USE)
+        self.assertEqual(hunger_plan.action, SimulaeAction.USE)
         self.assertGreaterEqual(len(hunger_plan.all_actions()), 1)
 
         before_hunger = self._require_number(self.actor.get_attribute(HUNGER))
@@ -131,15 +131,15 @@ class Test_NGIN_AI_Planning(unittest.TestCase):
 
         plan = TaskPlan(
             "food",
-            Action.USE,
-            pre_actions=[Action.SEARCH, (Action.TAKE, "food")],
-            post_actions=[(Action.INTERACT, "friend")],
+            SimulaeAction.USE,
+            pre_actions=[SimulaeAction.SEARCH, (SimulaeAction.TAKE, "food")],
+            post_actions=[(SimulaeAction.INTERACT, "friend")],
         )
 
-        self.assertEqual(plan.next_action(), (Action.SEARCH, "food"))
-        self.assertEqual(plan.next_action(), (Action.TAKE, "food"))
-        self.assertEqual(plan.next_action(), (Action.USE, "food"))
-        self.assertEqual(plan.next_action(), (Action.INTERACT, "friend"))
+        self.assertEqual(plan.next_action(), (SimulaeAction.SEARCH, "food"))
+        self.assertEqual(plan.next_action(), (SimulaeAction.TAKE, "food"))
+        self.assertEqual(plan.next_action(), (SimulaeAction.USE, "food"))
+        self.assertEqual(plan.next_action(), (SimulaeAction.INTERACT, "friend"))
         self.assertIsNone(plan.next_action())
 
     def test_world_state_search_and_goto_resolve_real_locations(self):
@@ -153,26 +153,26 @@ class Test_NGIN_AI_Planning(unittest.TestCase):
         resolved_camp = self._require_node(self.actor.resolve_world_node("camp", nodetype=LOC))
         self.assertIs(resolved_camp, loc_c)
 
-        search_plan = TaskPlan("camp", Action.SEARCH)
+        search_plan = TaskPlan("camp", SimulaeAction.SEARCH)
         search_action, search_target = self._require_action_result(self.actor.act(search_plan))
 
-        self.assertEqual(search_action, Action.SEARCH)
+        self.assertEqual(search_action, SimulaeAction.SEARCH)
         self.assertEqual(self._require_text(search_target), "camp")
         self.assertIn(LOC, self.actor.Memory)
         self.assertIn(loc_c.ID, self.actor.Memory[LOC])
 
         route = self.actor.pathfind_to(loc_c)
         self.assertEqual(len(route), 2)
-        self.assertEqual(route[0], (Action.GOTO, loc_b))
-        self.assertEqual(route[1], (Action.GOTO, loc_c))
+        self.assertEqual(route[0], (SimulaeAction.GOTO, loc_b))
+        self.assertEqual(route[1], (SimulaeAction.GOTO, loc_c))
         self.assertEqual(self.actor.get_world_distance_to(loc_c), 3)
         self.assertEqual(self.actor.pathfind_to(loc_a), [])
         self.assertEqual(distance_between(self.actor, loc_c), 3)
 
-        goto_plan = TaskPlan("camp", Action.GOTO)
+        goto_plan = TaskPlan("camp", SimulaeAction.GOTO)
         goto_action, goto_target = self._require_action_result(self.actor.act(goto_plan))
 
-        self.assertEqual(goto_action, Action.GOTO)
+        self.assertEqual(goto_action, SimulaeAction.GOTO)
         self.assertEqual(self._require_node(goto_target).ID, loc_c.ID)
         self.assertEqual(self.actor.get_location(), loc_c.ID)
 
@@ -203,16 +203,16 @@ class Test_NGIN_AI_Planning(unittest.TestCase):
         current_location = self._require_node(self.actor.get_current_location_node())
         self.assertIs(current_location, loc_a)
 
-        search_plan = TaskPlan("lantern", Action.SEARCH)
+        search_plan = TaskPlan("lantern", SimulaeAction.SEARCH)
         search_action, search_target = self._require_action_result(self.actor.act(search_plan))
-        self.assertEqual(search_action, Action.SEARCH)
+        self.assertEqual(search_action, SimulaeAction.SEARCH)
         self.assertEqual(self._require_text(search_target), "lantern")
         self.assertIn(OBJ, self.actor.Memory)
         self.assertIn(lantern.ID, self.actor.Memory[OBJ])
         self.assertEqual(self.actor.get_relations_by_criteria("lantern", relation_types=(CONTENTS, ATTACHMENTS)), [])
 
         acquire_route = self.actor.acquire_vague_target("lantern")
-        self.assertEqual(acquire_route, [(Action.GOTO, loc_b), (Action.TAKE, lantern)])
+        self.assertEqual(acquire_route, [(SimulaeAction.GOTO, loc_b), (SimulaeAction.TAKE, lantern)])
 
         acquired = self.actor.acquire("lantern")
         self.assertEqual(acquired, acquire_route)
@@ -234,11 +234,11 @@ class Test_NGIN_AI_Planning(unittest.TestCase):
         recipe_workstation, recipe_components = self.actor.get_recipe(food_target)
         self.assertIsNone(recipe_workstation)
         self.assertEqual(recipe_components, ["meat", "water", "herbs"])
-        self.assertEqual(self.actor.acquire(food_target), [(Action.MAKE, food_target)])
+        self.assertEqual(self.actor.acquire(food_target), [(SimulaeAction.MAKE, food_target)])
 
-        make_action, make_target = self._require_action_result(self.actor.act(TaskPlan(food_target, Action.MAKE)))
+        make_action, make_target = self._require_action_result(self.actor.act(TaskPlan(food_target, SimulaeAction.MAKE)))
 
-        self.assertEqual(make_action, Action.MAKE)
+        self.assertEqual(make_action, SimulaeAction.MAKE)
         crafted_food = self._require_node(make_target)
         self.assertEqual(self._require_text(crafted_food.get_reference(NAME)), "food")
         self.assertEqual(
@@ -252,9 +252,9 @@ class Test_NGIN_AI_Planning(unittest.TestCase):
         self.actor.set_attribute(HUNGER, 90)
         self.actor.set_attribute(THIRST, 80)
 
-        use_action, use_target = self._require_action_result(self.actor.act(TaskPlan(food_target, Action.USE)))
+        use_action, use_target = self._require_action_result(self.actor.act(TaskPlan(food_target, SimulaeAction.USE)))
 
-        self.assertEqual(use_action, Action.USE)
+        self.assertEqual(use_action, SimulaeAction.USE)
         self._require_node(use_target)
         self.assertLess(self._require_number(self.actor.get_attribute(HUNGER)), 90)
         self.assertLess(self._require_number(self.actor.get_attribute(THIRST)), 80)
@@ -296,8 +296,8 @@ class Test_NGIN_AI_Planning(unittest.TestCase):
         self.assertFalse(self.actor.can_make("unknown recipe"))
         self.assertTrue(self.actor.can_make("meal"))
 
-        blanket_action, blanket_target_item = self._require_action_result(self.actor.act(TaskPlan(blanket_target, Action.MAKE)))
-        self.assertEqual(blanket_action, Action.MAKE)
+        blanket_action, blanket_target_item = self._require_action_result(self.actor.act(TaskPlan(blanket_target, SimulaeAction.MAKE)))
+        self.assertEqual(blanket_action, SimulaeAction.MAKE)
         crafted_blanket = self._require_node(blanket_target_item)
         self.assertEqual(self._require_text(crafted_blanket.get_reference(NAME)), "blanket")
         self.assertEqual(self._require_text(crafted_blanket.get_reference("Placement")), "attachments")
@@ -313,8 +313,8 @@ class Test_NGIN_AI_Planning(unittest.TestCase):
         self.actor.set_relation(cloth_2, CONTENTS)
         self.actor.set_relation(straw, CONTENTS)
 
-        bed_action, bed_target_item = self._require_action_result(self.actor.act(TaskPlan(bed_target, Action.MAKE)))
-        self.assertEqual(bed_action, Action.MAKE)
+        bed_action, bed_target_item = self._require_action_result(self.actor.act(TaskPlan(bed_target, SimulaeAction.MAKE)))
+        self.assertEqual(bed_action, SimulaeAction.MAKE)
         crafted_bed = self._require_node(bed_target_item)
         self.assertEqual(self._require_text(crafted_bed.get_reference(NAME)), "bed")
         self.assertEqual(self._require_text(crafted_bed.get_reference("Placement")), "location")
@@ -393,15 +393,15 @@ class Test_NGIN_AI_Planning(unittest.TestCase):
         self.actor.set_relation(blanket, CONTENTS)
         self.actor.set_relation(bed, CONTENTS)
 
-        blanket_action, blanket_target_item = self._require_action_result(self.actor.act(TaskPlan(blanket, Action.USE)))
-        self.assertEqual(blanket_action, Action.USE)
+        blanket_action, blanket_target_item = self._require_action_result(self.actor.act(TaskPlan(blanket, SimulaeAction.USE)))
+        self.assertEqual(blanket_action, SimulaeAction.USE)
         self._require_node(blanket_target_item)
         self.assertEqual(self.actor.get_relations_by_criteria("blanket", relation_types=(ATTACHMENTS,)), [blanket])
         self.assertEqual(self.actor.get_relations_by_criteria("blanket", relation_types=(CONTENTS,)), [])
         self.assertGreater(self._require_number(self.actor.get_attribute(TEMPERATURE)), 25)
 
-        bed_action, bed_target_item = self._require_action_result(self.actor.act(TaskPlan(bed, Action.USE)))
-        self.assertEqual(bed_action, Action.USE)
+        bed_action, bed_target_item = self._require_action_result(self.actor.act(TaskPlan(bed, SimulaeAction.USE)))
+        self.assertEqual(bed_action, SimulaeAction.USE)
         self._require_node(bed_target_item)
         self.assertEqual(self.actor.get_relations_by_criteria("bed", relation_types=(CONTENTS, ATTACHMENTS)), [])
 

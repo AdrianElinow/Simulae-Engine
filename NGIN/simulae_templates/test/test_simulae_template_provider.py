@@ -59,6 +59,19 @@ class TestSimulaeTemplateProvider(unittest.TestCase):
         self.assertEqual(provider.find_schema("@simulae/human.json"), human_path)
         self.assertEqual(provider.find_schema("@simulae/POI/human.json"), human_path)
 
+    def test_constructor_indexes_simulae_action_schema(self):
+        action_path = self.write_schema(
+            "simulae/simulae_action.json",
+            {
+                "$id": "@simulae/simulae_action.json",
+                "title": "Simulae Action",
+            },
+        )
+
+        provider = SimulaeTemplateProvider(self.template_root)
+
+        self.assertEqual(provider.find_schema("@simulae/simulae_action.json"), action_path)
+
     def test_constructor_indexes_human_body_aliases(self):
         heart_path = self.write_schema(
             "OBJ/Human/heart.json",

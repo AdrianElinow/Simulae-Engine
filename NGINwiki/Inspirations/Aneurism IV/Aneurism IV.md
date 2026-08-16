@@ -3,7 +3,7 @@
 ANEURISM IV is an immersive multiplayer industrial nightmare simulator set in a rotting city-state.
 The game is built around three linked layers:
 - [[Fates]] define who the player is while possessed.
-- [[Systems]] define how the city, law, rot, money, and events behave.
+- [[Inspirations/Aneurism IV/Systems/Systems]] define how the city, law, rot, money, and events behave.
 - [[Items]] define what can be carried, crafted, traded, or used to bend those systems.
 
 ## Core Loop
@@ -20,6 +20,6 @@ The game is built around three linked layers:
 
 ## Navigation
 - [[Fates]]
-- [[Systems]]
+- [[Inspirations/Aneurism IV/Systems/Systems]]
 - [[Items]]
 - [[Gamemodes/Immersive Sim/Aneurism IV/Factions]]

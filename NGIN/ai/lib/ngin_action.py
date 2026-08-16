@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-class Action(Enum):
+class SimulaeAction(Enum):
     GOTO = 1
     ACQUIRE = 2
     TAKE = 3

@@ -1,0 +1,57 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "@simulae/Human/hand.json",
+    "title": "Human Hand",
+    "allOf": [
+        {
+            "$ref": "@simulae/simulae_node.json"
+        }
+    ],
+    "properties": {
+        "nodetype": {
+            "const": "Object"
+        },
+        "references": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "const": "Hand"
+                },
+                "species": {
+                    "const": "Human"
+                },
+                "orientation": {
+                    "type": "string",
+                    "enum": [
+                        "Left",
+                        "Right"
+                    ]
+                }
+            }
+        },
+        "attributes": {
+            "type": "object",
+            "properties": {
+                "weight": {
+                    "type": "number",
+                    "unit": "kilograms",
+                    "generation": {
+                        "type": "derived_ratio",
+                        "source": "body_weight",
+                        "ratio": {
+                            "distribution": "constant",
+                            "value": 0.005,
+                            "min": 0.005,
+                            "max": 0.005,
+                            "average": 0.005,
+                            "stddev": 0
+                        }
+                    }
+                }
+            }
+        },
+        "abilities": {
+            
+        }
+    }
+}

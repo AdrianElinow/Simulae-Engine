@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+from typing import Any
 import uuid
 
 from NGIN.utilities.lib.SimulaeConstants import *
@@ -13,6 +14,8 @@ from NGIN.utilities.lib.social_scale_utils import (
 )
 from NGIN.config.madlibs import *
 
+StringKeyDict = dict[str, Any]
+
 class SimulaeNode:
     '''
     Simulae Node
@@ -21,13 +24,13 @@ class SimulaeNode:
 
     def __init__(self,  given_id=None, 
                         nodetype=OBJ,
-                        references: dict | None = None,
-                        attributes: dict | None = None,
-                        relations: dict | None = None, 
-                        checks: dict | None = None, 
-                        abilities: dict | None = None,
+                        references: StringKeyDict | None = None,
+                        attributes: StringKeyDict | None = None,
+                        relations: StringKeyDict | None = None, 
+                        checks: StringKeyDict | None = None, 
+                        abilities: StringKeyDict | None = None,
                         scales: dict[str, dict] | None = None, 
-                        memory: dict | None = None,):
+                        memory: StringKeyDict | None = None,):
         '''
         Docstring for __init__
         

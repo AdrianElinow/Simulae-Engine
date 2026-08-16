@@ -1,9 +1,15 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from NGIN.api import create_app
+try:
+    from NGIN.api import create_app
+except ModuleNotFoundError as error:
+    if error.name not in {"flask", "flask_cors"}:
+        raise
+    create_app = None
 
 
+@unittest.skipIf(create_app is None, "Flask dependencies are not installed")
 class TestApi(unittest.TestCase):
     def setUp(self):
         self.app = create_app({"TESTING": True})

@@ -69,22 +69,22 @@
         "components": {
             "object": {
                 "head": {
-                    "$ref": "@simulae/Human/head.json"
+                    "$ref": "@simulae/organism/human/head.json"
                 },
                 "torso": {
-                    "$ref": "@simulae/Human/torso.json"
+                    "$ref": "@simulae/organism/human/torso.json"
                 },
                 "left-arm": {
-                    "$ref": "@simulae/Human/left_arm.json"
+                    "$ref": "@simulae/organism/human/left_arm.json"
                 },
                 "right-arm": {
-                    "$ref": "@simulae/Human/right_arm.json"
+                    "$ref": "@simulae/organism/human/right_arm.json"
                 },
                 "left-leg": {
-                    "$ref": "@simulae/Human/left_leg.json"
+                    "$ref": "@simulae/organism/human/left_leg.json"
                 },
                 "right-leg": {
-                    "$ref": "@simulae/Human/right_leg.json"
+                    "$ref": "@simulae/organism/human/right_leg.json"
                 }
             }
         }

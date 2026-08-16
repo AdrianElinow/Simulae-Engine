@@ -4,8 +4,8 @@ Hitman: World of Assassination is an immersive assassination sandbox about readi
 It is built around four linked layers:
 - [[Roles]] define who is in the mission space and how they behave.
 - [[Roster]] collects the major factions, recurring characters, and target examples.
-- [[Factions]] define who cooperates, who questions, and who escalates.
-- [[Systems]] define disguises, suspicion, witnesses, and exit pressure.
+- [[Inspirations/Hitman/Factions]] define who cooperates, who questions, and who escalates.
+- [[Inspirations/Hitman/Systems]] define disguises, suspicion, witnesses, and exit pressure.
 
 ## Core Loop
 1. Study the venue, the target routine, and the security graph.
@@ -23,5 +23,5 @@ It is built around four linked layers:
 ## Navigation
 - [[Roles]]
 - [[Roster]]
-- [[Factions]]
-- [[Systems]]
+- [[Inspirations/Hitman/Factions]]
+- [[Inspirations/Hitman/Systems]]

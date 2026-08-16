@@ -274,12 +274,12 @@ The following well-known examples are useful as capability targets. The system s
 
 ## Concrete Implementation Architecture
 
-The narrative-device system should be implemented as a deterministic orchestration service around existing [[SimulaeNode]], [[Simulae Event]], [[Fact]], [[Condition]], [[Task]], [[Plan]], relation, and memory systems. Generated prose can describe an approved narrative beat, but it must not invent canonical facts, select the hidden truth, or mutate world state directly.
+The narrative-device system should be implemented as a deterministic orchestration service around existing [[SimulaeNode]], [[Simulae Event]], [[Fact]], [[Simulae Condition]], [[Task]], [[Plan]], relation, and memory systems. Generated prose can describe an approved narrative beat, but it must not invent canonical facts, select the hidden truth, or mutate world state directly.
 
 ### Runtime Components
 
 - **Narrative registry** loads versioned arc templates, device templates, genre packs, and validation rules.
-- **World-state query service** resolves [[Selector]] and [[Condition]] expressions against nodes, events, relations, memories, tasks, and current pressures.
+- **World-state query service** resolves [[Selector]] and [[Simulae Condition]] expressions against nodes, events, relations, memories, tasks, and current pressures.
 - **Narrative director** decides whether a narrative needs a device and ranks eligible templates using pacing, novelty, tone, and state fit.
 - **Role binder** assigns real [[SimulaeNode]] IDs to abstract roles such as `subject`, `apparent_culprit`, `beneficiary`, `witness`, and `protected_asset`.
 - **Truth ledger** stores immutable canonical propositions and the event IDs that establish them.

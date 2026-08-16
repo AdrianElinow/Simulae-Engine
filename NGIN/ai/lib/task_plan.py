@@ -1,5 +1,5 @@
 
-from NGIN.ai.lib.ngin_action import Action
+from NGIN.ai.lib.ngin_action import SimulaeAction
 from NGIN.ai.lib.socialization_utils import _normalize_action_step, get_heuristic
 
 
@@ -73,7 +73,7 @@ class TaskPlan():
             return "<empty>"
 
         action, target = normalized
-        action_name = action.name if isinstance(action, Action) else str(action)
+        action_name = action.name if isinstance(action, SimulaeAction) else str(action)
         return f"{action_name}({target})"
         
 

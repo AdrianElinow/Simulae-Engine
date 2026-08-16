@@ -1,0 +1,1 @@
+Machines are Object [[SimulaeNode]]s with collections of abilities and possibly recipes
