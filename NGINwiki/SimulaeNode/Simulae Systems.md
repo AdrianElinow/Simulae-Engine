@@ -1,45 +1,55 @@
 
 # Core Systems
+
 - [[Plan]]ning and [[Task Breakdown]]
-- [[Socialization]] 
-	- [[Personality]] & [[Quirks]]
-	- [[Politics]]
-	- [[Social Deduction]]
+- [[Socialization]]
+  - [[Personality]] & [[Quirks]]
+  - [[Politics]]
+  - [[Social Deduction]]
 - Data-structure-driven-logic
 - Implements (tools), Machines, & Stations
 
-# Physical Systems
+## Physical Systems
 
-## Physics Systems
+...
+
+### Physics Systems
+
 - Wave Events (Light, Sound, Radio, Pressure, etc)
 - Collision & Ballistics
 - Chemical Interactions
-	- Composition
-	- Decomposition
-	- Reaction
-## World Systems
+  - Composition
+  - Decomposition
+  - Reaction
+
+### World Systems
+
 - Weather
 - ...
 
-# Metaphysical Systems
+## Metaphysical Systems
 
-## Social Systems
+...
+
+### Social Systems
+
 - Family & Inheritance (Genetics System)
 - Social Groups (Community, Churches, Hobby groups, online groups)
 - Factions
-	- Governments (Authority)
-	- Corporations (Alternate interests)
+  - Governments (Authority)
+  - Corporations (Alternate interests)
 - Complex goals-oriented distrubutive planning & ordering
 - Structural reactivity
-	- Leadership removal/replacement
+  - Leadership removal/replacement
 - Economy
 
 ## Gameplay Systems
+
 - Magic - [[Abilities]]
-	- Spells
-	- Rituals
+  - Spells
+  - Rituals
 - Technology - [[Simulae Machine]]s
-	- Machines
-	- Computers
-	- Cybernetics
+  - Machines
+  - Computers
+  - Cybernetics
 - Research & Progression
